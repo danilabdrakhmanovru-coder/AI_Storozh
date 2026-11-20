@@ -1,0 +1,17 @@
+# Настраиваемая политика безопасности ИИ-сторожа
+thresholds:
+  confirm: 0.35   # риск >= -> запросить подтверждение
+  block: 0.75     # риск >= -> блокировать
+default_role: guest
+own_data_only: true          # доступ к данным только своего user_id
+confirm_tools: [shell, send_email, delete_file, sql_write]
+forbidden_paths:
+  - /etc/passwd
+  - /etc/shadow
+  - .ssh
+  - .env
+  - id_rsa
+roles:
+  guest:   {allowed_tools: [search]}
+  analyst: {allowed_tools: [search, read_file, sql_select]}
+  admin:   {allowed_tools: [search, read_file, sql_select, sql_write, send_email, shell, delete_file]}

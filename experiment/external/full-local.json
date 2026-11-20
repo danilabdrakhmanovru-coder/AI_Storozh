@@ -1,0 +1,26 @@
+{
+  "benchmark1": {
+    "safe": {
+      "confirm": 2029,
+      "allow": 2497,
+      "block": 26
+    },
+    "threat": {
+      "confirm": 2827,
+      "allow": 2417,
+      "block": 195
+    }
+  },
+  "benchmark2": {
+    "safe": {
+      "confirm": 983,
+      "allow": 4686,
+      "block": 4
+    },
+    "threat": {
+      "allow": 811,
+      "block": 171,
+      "confirm": 1423
+    }
+  }
+}

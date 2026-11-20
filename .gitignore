@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+audit.db*
+.env
+artifacts/
+
+# Downloaded benchmark data (restored by experiment/external/run.py)
+experiment/external/benchmark*.csv
+.env.*
