@@ -11,6 +11,10 @@ from pydantic import BaseModel, Field
 from .classifier import classify
 from .category_model import predict, risk_level
 from .guard import COMPILED, normalize
+from .jailbreak_intent import signals as jailbreak_signals
+
+
+ROLE_RULES = [(rid, regex) for rid, _, _, regex in COMPILED if rid in {'inj_roleplay', 'jb_dan'}]
 
 
 class InferenceUnavailable(RuntimeError):
@@ -204,6 +208,14 @@ def _inspect(req, thresholds, raw_policy):
                 continue
             if category in policy['always_block'] or (category == 'unauthorized_data_access'
                     or (category == 'tool_abuse' and weight >= 0.7)):
+                if (source == 'prompt' and not ctx.attachments and not educational
+                        and category in {'prompt_injection', 'system_prompt_override'}
+                        and 'jailbreak' in policy['always_block']
+                        and {'role', 'reply'} <= jailbreak_signals(text)):
+                    for role_rule, pattern in ROLE_RULES:
+                        if pattern.search(text):
+                            return result('block', 'jailbreak',
+                                          f'Запрошена смена роли с обходом защиты. Правила {role_rule} и {rid}.')
                 return result('block', category, f'Сработало правило {rid}, источник {source}.')
     for action in agent.get('forbidden_actions', []):
         if action == 'pipe_remote_script_to_shell' and pipe_definition:

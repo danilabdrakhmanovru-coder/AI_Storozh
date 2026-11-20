@@ -15,7 +15,7 @@ from experiment.v6.train import training_rows
 OUT = Path(__file__).resolve().parent
 
 
-def main(*, extra_rows=(), encode=model_text, destination=MODEL):
+def main(*, extra_rows=(), encode=model_text, destination=MODEL, extra_features=(), feature_weights=None):
     excluded = set(json.loads((ROOT / "experiment/v3/split.json").read_bytes())["holdout_ids"])
     rows = [r for r in lines(ROOT / "artifacts/astra_public/dev.jsonl") if r["id"] not in excluded]
     rows.extend(r for r in lines(ROOT / "experiment/synthetic1000/cases.jsonl") if r["tags"][0] == "bank")
@@ -41,7 +41,8 @@ def main(*, extra_rows=(), encode=model_text, destination=MODEL):
     model = make_pipeline(FeatureUnion([
         ("word", TfidfVectorizer(sublinear_tf=True, ngram_range=(1, 2))),
         ("char", TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), min_df=2, sublinear_tf=True)),
-    ]), LinearSVC(class_weight="balanced", random_state=42))
+        *extra_features,
+    ], transformer_weights=feature_weights), LinearSVC(class_weight="balanced", random_state=42))
     model.fit(list(examples), list(examples.values()))
     joblib.dump(model, destination, compress=3)
     print(f"Unique train inputs: {len(examples)} including {sum(examples.values())} jailbreaks")

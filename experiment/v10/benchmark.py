@@ -34,11 +34,11 @@ def make_row(key, group, text):
                 group=group, expected_decision="allow" if safe else "block", risk_category="none" if safe else group)
 
 
-def holdout():
+def holdout(part="holdout"):
     rows = []
-    for i, line in enumerate((OUT / "holdout.txt").read_text("utf8").splitlines(), 1):
+    for i, line in enumerate((OUT / (part + ".txt")).read_text("utf8").splitlines(), 1):
         group, text = line.split("|", 1)
-        row = make_row(f"authored-{i:03}", group, text)
+        row = make_row(f"{part}-{i:03}", group, text) if part == "final" else make_row(f"authored-{i:03}", group, text)
         if i % 4 == 0:
             row["context"]["history"] = [dict(role="user", content=text)]
             row["user_prompt"] = "Please continue." if text.isascii() else "Продолжи."
@@ -50,7 +50,11 @@ def holdout():
     source = list(csv.DictReader(io.StringIO(raw.decode("utf-8-sig"))))
     seen = {x["index"] for path in (HERE / "manifest.json", OUT.parent / "v9/external-control.json")
             for x in json.loads(path.read_bytes())["rows"] if x["source"] == "benchmark2"}
-    for group, indices in [("jailbreak", ROLE_CASES), ("ordinary", ORDINARY_CASES)]:
+    groups = [("jailbreak", ROLE_CASES), ("ordinary", ORDINARY_CASES)]
+    if part == "final":
+        seen.update(map(int, (ROLE_CASES + " " + ORDINARY_CASES).split()))
+        groups = [line.split("|") for line in (OUT / "final-indices.txt").read_text("utf8").splitlines()]
+    for group, indices in groups:
         for j, index in enumerate(map(int, indices.split())):
             if index in seen:
                 continue
@@ -114,8 +118,8 @@ def main(version, part):
     if detects_jailbreak.__module__ != expected_module:
         raise ValueError(f"Checkout the {version} implementation before recording its predictions")
     jobs = []
-    if part == "holdout":
-        jobs.append(("holdout", holdout(), version))
+    if part in {"holdout", "final"}:
+        jobs.append((part, holdout(part), version))
     if part == "regression":
         jobs.append(("nine-control", list(fresh("acceptance.txt", "acceptance")), version))
         jobs.append(("public", read_lines((ROOT / "artifacts/astra_public/v3-holdout.jsonl").read_bytes()), version))
@@ -128,12 +132,12 @@ def main(version, part):
         report = dict(pool.map(run, jobs))
     (OUT / version / (part + ".json")).write_text(json.dumps(report, indent=2), "utf8")
     print({name: {k: v for k, v in stats.items() if k != "category_errors"}
-           for name, stats in report.items() if name in {"holdout", "nine-control", "public"}})
+           for name, stats in report.items() if name in {"holdout", "final", "nine-control", "public"}})
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("version", choices=["v9", "v10"])
-    parser.add_argument("part", choices=["regression", "holdout"])
+    parser.add_argument("part", choices=["regression", "holdout", "final"])
     args = parser.parse_args()
     main(args.version, args.part)
