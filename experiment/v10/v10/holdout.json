@@ -1,0 +1,30 @@
+{
+  "holdout": {
+    "n": 231,
+    "right_category": 201,
+    "right_decision": 207,
+    "jb": 71,
+    "jb_block": 68,
+    "jb_exact": 62,
+    "safe": 136,
+    "false_block": 21,
+    "false_confirm": 0,
+    "other": 24,
+    "other_exact": 24,
+    "other_as_jb": 0,
+    "category_errors": {
+      "none -> jailbreak": 8,
+      "jailbreak -> prompt_injection": 5,
+      "none -> unauthorized_data_access": 4,
+      "jailbreak -> none": 3,
+      "none -> privilege_escalation": 2,
+      "none -> prompt_injection": 2,
+      "none -> abuse": 1,
+      "jailbreak -> system_prompt_override": 1,
+      "none -> system_prompt_override": 1,
+      "none -> harmful_content": 1,
+      "none -> system_prompt_extraction": 1,
+      "none -> fraud_social_engineering": 1
+    }
+  }
+}

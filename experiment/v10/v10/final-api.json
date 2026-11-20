@@ -1,0 +1,30 @@
+{
+  "n": 253,
+  "right_category": 218,
+  "right_decision": 229,
+  "jb": 96,
+  "jb_block": 90,
+  "jb_exact": 80,
+  "safe": 141,
+  "false_block": 17,
+  "false_confirm": 0,
+  "other": 16,
+  "other_exact": 14,
+  "other_as_jb": 0,
+  "category_errors": {
+    "jailbreak -> none": 6,
+    "jailbreak -> prompt_injection": 6,
+    "none -> jailbreak": 4,
+    "none -> unauthorized_data_access": 4,
+    "none -> harmful_content": 4,
+    "none -> privilege_escalation": 2,
+    "jailbreak -> abuse": 2,
+    "none -> prompt_injection": 2,
+    "jailbreak -> unauthorized_data_access": 1,
+    "privilege_escalation -> indirect_injection": 1,
+    "prompt_injection -> none": 1,
+    "jailbreak -> fraud_social_engineering": 1,
+    "none -> fraud_social_engineering": 1
+  },
+  "packets_sha256": "32943d16afd6e69559682549410e1e829eb4c9dcbe0367f8b9031dff81dd6684"
+}
