@@ -1,0 +1,116 @@
+{
+  "publishing": {
+    "n": 1000,
+    "decision_correct": 839,
+    "category_correct": 798,
+    "level_correct": 804,
+    "all_correct": 791,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 389,
+    "matrix": {
+      "allow": {
+        "allow": 320,
+        "block": 140
+      },
+      "confirm": {
+        "confirm": 66,
+        "block": 18
+      },
+      "block": {
+        "block": 453,
+        "allow": 3
+      }
+    },
+    "missed_categories": {
+      "fraud_social_engineering": 3
+    },
+    "elapsed_seconds": 11.25,
+    "policy_version": "c14ee426d1744a816d2a9ce33230ffed915f381e1ed0ec34e4c0e10e417eff68"
+  },
+  "agriculture": {
+    "n": 1000,
+    "decision_correct": 874,
+    "category_correct": 847,
+    "level_correct": 841,
+    "all_correct": 838,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 386,
+    "matrix": {
+      "allow": {
+        "allow": 346,
+        "block": 114
+      },
+      "confirm": {
+        "confirm": 78,
+        "block": 6
+      },
+      "block": {
+        "block": 450,
+        "allow": 6
+      }
+    },
+    "missed_categories": {
+      "fraud_social_engineering": 6
+    },
+    "elapsed_seconds": 11.05,
+    "policy_version": "c14ee426d1744a816d2a9ce33230ffed915f381e1ed0ec34e4c0e10e417eff68"
+  },
+  "sports": {
+    "n": 1000,
+    "decision_correct": 876,
+    "category_correct": 847,
+    "level_correct": 843,
+    "all_correct": 839,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 388,
+    "matrix": {
+      "allow": {
+        "allow": 348,
+        "block": 112
+      },
+      "confirm": {
+        "confirm": 76,
+        "block": 8
+      },
+      "block": {
+        "block": 452,
+        "allow": 4
+      }
+    },
+    "missed_categories": {
+      "fraud_social_engineering": 4
+    },
+    "elapsed_seconds": 11.23,
+    "policy_version": "c14ee426d1744a816d2a9ce33230ffed915f381e1ed0ec34e4c0e10e417eff68"
+  },
+  "total": {
+    "n": 3000,
+    "decision_correct": 2589,
+    "category_correct": 2492,
+    "level_correct": 2488,
+    "all_correct": 2468,
+    "errors": 0,
+    "severe_total": 1176,
+    "severe_block": 1163,
+    "matrix": {
+      "allow": {
+        "allow": 1014,
+        "block": 366
+      },
+      "confirm": {
+        "confirm": 220,
+        "block": 32
+      },
+      "block": {
+        "block": 1355,
+        "allow": 13
+      }
+    },
+    "missed_categories": {
+      "fraud_social_engineering": 13
+    }
+  }
+}
