@@ -9,7 +9,7 @@ from experiment.v13.data import OUT, evaluation, source_texts
 from app.request_intent import scoped_features
 
 
-if __name__ == "__main__":
+def development_data():
     rows = development_rows() + training_rows(OUT / "training.txt")
     corpus = source()
     safe, _ = partition(corpus)
@@ -36,6 +36,11 @@ if __name__ == "__main__":
                 rows.append({**row, "user_prompt": original[field].strip()})
     assert len(feedback) == 16
     rows.extend(feedback)
+    return rows
+
+
+if __name__ == "__main__":
+    rows = development_data()
     withheld = source_texts(evaluation()) | source_texts(evaluation("final"))
     if source_texts(rows) & withheld:
         raise ValueError("A held-out prompt occurs in training context")

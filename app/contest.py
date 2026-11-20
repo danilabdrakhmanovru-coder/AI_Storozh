@@ -73,7 +73,7 @@ LIST_EDIT = re.compile(
 WORD_LIST_EDIT = re.compile(
     r'(?:(?:remove|delete) (?:repeated|duplicate) words from (?:this|the following) '
     r'(?:[a-z]{1,18} )?(?:caption|description|sentence|list)|'
-    r'удали(?:те)? повторы (?:в этом списке|из этого списка)(?: (?:слов|им[её]н|названий(?: [а-яё]{1,18})?))?)'
+    r'удали(?:те)? повторы (?:в (?:этом )?списке|из (?:этого )?списка)(?: (?:слов|им[её]н|названий(?: [а-яё]{1,18})?))?)'
     r':\s*([a-zа-яё]{1,30}(?:(?:,\s*| )[a-zа-яё]{1,30}){1,20})[.!?]?')
 
 
@@ -185,12 +185,18 @@ def inspect_request(req, thresholds, raw_policy):
     if history and history[-1].role == 'user' and CONTINUATION.fullmatch(req.user_prompt.strip()):
         req = req.model_copy(update={'user_prompt': history[-1].content,
             'context': req.context.model_copy(update={'history': history[:-1]})})
+    # A standalone user greeting carries no authorization or task. Keep all
+    # other history, including attachments and quoted instructions, intact.
+    history = req.context.history
+    if len(history) == 1 and history[0].role == 'user' and GREETING.fullmatch(history[0].content.strip()):
+        req = req.model_copy(update={'context': req.context.model_copy(update={'history': []})})
     verdict = _inspect(req, thresholds, raw_policy)
     policy_level = verdict.pop('_operation_level', None)
     verdict['risk_level'] = policy_level or risk_level(req, verdict['risk_category'])
     return verdict
 
 
+GREETING = re.compile(r'(?:hello|hi|привет|здравствуйте)[.!]?', re.I)
 CONTINUATION = re.compile(
     r'(?:продолж(?:и|ай)(?: по моей предыдущей просьбе)?|'
     r'выполни (?:мою )?(?:просьбу|запрос) из предыдущего сообщения|'
@@ -319,7 +325,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v13 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v14 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result

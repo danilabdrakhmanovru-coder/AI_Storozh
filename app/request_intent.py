@@ -7,7 +7,7 @@ import joblib
 
 from .jailbreak_intent import features
 
-MODEL = Path(__file__).resolve().parents[1] / "experiment/v13/intent.joblib"
+MODEL = Path(__file__).resolve().parents[1] / "experiment/v14/intent.joblib"
 BEHAVIOR = re.compile(
     r"модерир|модерац|проверк.{0,30}(?:ответ|реплик)|защитн.{0,20}проверк|"
     r"фильтр|ограничени|рамки ии|рамок ии|этическ|моральн|цензур|"
@@ -109,6 +109,25 @@ def scoped_features(req):
     return current_features(req) + " " + " ".join("jb_request_" + flag for flag in flags)
 
 
+SPEAKER = re.compile(r"выступ\w* в роли|сыграй|от (?:имени|лица)|персонаж|act as|play (?:the|a) role|"
+                     r"be my|conversation partner|in the voice of|as (?:a|the) (?:teacher|coach|guide)")
+LANGUAGE_TASK = re.compile(r"преподавател|произношени|грамматик|диалог|сказк|приветств|"
+                           r"разговорн|conversation|grammar|greet|practi[cs]e|tutor|dialogue|storytell")
+OUTPUT_CHECK = re.compile(r"what you (?:may|can) safely say|screening of (?:its|your) own (?:repl|answer)|"
+                          r"checks? on (?:what|how safely) you|проверк\w* того.{0,40}безопасн")
+PAUSED = re.compile(r"switch(?:ed)? off|turn(?:ed)? off|suspend\w*|disabl\w*|inactive|отключ\w*|приостанов\w*")
+
+
+def intent_features(req):
+    text = req.user_prompt.casefold()
+    tokens = []
+    if SPEAKER.search(text) and LANGUAGE_TASK.search(text):
+        tokens.append("speaker_task")
+    if OUTPUT_CHECK.search(text) and PAUSED.search(text):
+        tokens.append("output_checks_paused")
+    return scoped_features(req) + " " + " ".join("jb_request_" + token for token in tokens)
+
+
 @lru_cache(maxsize=1)
 def load():
     return joblib.load(MODEL)
@@ -116,7 +135,7 @@ def load():
 
 def assessment(req):
     model = load()
-    scores = dict(zip(model.classes_, model.decision_function([scoped_features(req)])[0]))
+    scores = dict(zip(model.classes_, model.decision_function([intent_features(req)])[0]))
     text = req.user_prompt
     if (len(text) >= 600 and not req.context.attachments and not req.context.history
             and -0.55 < scores['jailbreak'] < 0.60 and (ROLE.search(text.casefold()) or PERSONA.search(text.casefold()))):
@@ -127,7 +146,7 @@ def assessment(req):
         for i in range(len(sentences)):
             segment = " ".join(sentences[max(0, i-1):i+2])[:1200]
             if (UNBOUND.search(sentences[i].casefold()) or MANDATE.search(sentences[i].casefold())):
-                windows.append(scoped_features(req.model_copy(update={'user_prompt': segment})))
+                windows.append(intent_features(req.model_copy(update={'user_prompt': segment})))
                 if len(windows) == 4:
                     break
         if windows:
