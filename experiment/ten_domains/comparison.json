@@ -1,0 +1,1839 @@
+{
+  "v7": {
+    "theater": {
+      "n": 1000,
+      "decision_correct": 990,
+      "category_correct": 970,
+      "level_correct": 965,
+      "all_correct": 955,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 390,
+      "matrix": {
+        "allow": {
+          "allow": 470
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 450,
+          "allow": 10
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 10
+      }
+    },
+    "weather": {
+      "n": 1000,
+      "decision_correct": 967,
+      "category_correct": 937,
+      "level_correct": 943,
+      "all_correct": 925,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 390,
+      "matrix": {
+        "allow": {
+          "allow": 450,
+          "block": 20
+        },
+        "confirm": {
+          "confirm": 67,
+          "block": 3
+        },
+        "block": {
+          "block": 450,
+          "allow": 10
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 10
+      }
+    },
+    "bakery": {
+      "n": 1000,
+      "decision_correct": 990,
+      "category_correct": 970,
+      "level_correct": 965,
+      "all_correct": 955,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 390,
+      "matrix": {
+        "allow": {
+          "allow": 470
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 450,
+          "allow": 10
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 10
+      }
+    },
+    "planetarium": {
+      "n": 1000,
+      "decision_correct": 987,
+      "category_correct": 967,
+      "level_correct": 963,
+      "all_correct": 953,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 391,
+      "matrix": {
+        "allow": {
+          "allow": 466,
+          "block": 4
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 451,
+          "allow": 9
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 9
+      }
+    },
+    "recycling": {
+      "n": 1000,
+      "decision_correct": 989,
+      "category_correct": 969,
+      "level_correct": 964,
+      "all_correct": 954,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 390,
+      "matrix": {
+        "allow": {
+          "allow": 469,
+          "block": 1
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 450,
+          "allow": 10
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 10
+      }
+    },
+    "ceramics": {
+      "n": 1000,
+      "decision_correct": 988,
+      "category_correct": 968,
+      "level_correct": 963,
+      "all_correct": 953,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 390,
+      "matrix": {
+        "allow": {
+          "allow": 468,
+          "block": 2
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 450,
+          "allow": 10
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 10
+      }
+    },
+    "postal": {
+      "n": 1000,
+      "decision_correct": 988,
+      "category_correct": 967,
+      "level_correct": 962,
+      "all_correct": 952,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 391,
+      "matrix": {
+        "allow": {
+          "allow": 467,
+          "block": 3
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 451,
+          "allow": 9
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 9
+      }
+    },
+    "translation": {
+      "n": 1000,
+      "decision_correct": 911,
+      "category_correct": 878,
+      "level_correct": 890,
+      "all_correct": 878,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 343,
+      "matrix": {
+        "allow": {
+          "allow": 448,
+          "block": 22
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 393,
+          "allow": 67
+        }
+      },
+      "missed_categories": {
+        "system_prompt_override": 12,
+        "jailbreak": 17,
+        "prompt_injection": 10,
+        "unauthorized_data_access": 17,
+        "abuse": 9,
+        "harmful_content": 1,
+        "system_prompt_extraction": 1
+      }
+    },
+    "lighthouse": {
+      "n": 1000,
+      "decision_correct": 904,
+      "category_correct": 858,
+      "level_correct": 881,
+      "all_correct": 858,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 345,
+      "matrix": {
+        "allow": {
+          "allow": 441,
+          "block": 29
+        },
+        "confirm": {
+          "confirm": 68,
+          "block": 2
+        },
+        "block": {
+          "block": 395,
+          "allow": 65
+        }
+      },
+      "missed_categories": {
+        "abuse": 9,
+        "prompt_injection": 8,
+        "jailbreak": 17,
+        "system_prompt_override": 9,
+        "unauthorized_data_access": 17,
+        "data_exfiltration": 1,
+        "indirect_injection": 2,
+        "harmful_content": 1,
+        "system_prompt_extraction": 1
+      }
+    },
+    "weaving": {
+      "n": 1000,
+      "decision_correct": 907,
+      "category_correct": 876,
+      "level_correct": 887,
+      "all_correct": 876,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 337,
+      "matrix": {
+        "allow": {
+          "allow": 450,
+          "block": 20
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "allow": 73,
+          "block": 387
+        }
+      },
+      "missed_categories": {
+        "abuse": 10,
+        "unauthorized_data_access": 17,
+        "indirect_injection": 3,
+        "jailbreak": 23,
+        "prompt_injection": 9,
+        "system_prompt_override": 11
+      }
+    },
+    "development": {
+      "n": 7000,
+      "decision_correct": 6899,
+      "category_correct": 6748,
+      "level_correct": 6725,
+      "all_correct": 6647,
+      "errors": 0,
+      "severe_total": 2800,
+      "severe_block": 2732,
+      "matrix": {
+        "allow": {
+          "allow": 3260,
+          "block": 30
+        },
+        "confirm": {
+          "confirm": 487,
+          "block": 3
+        },
+        "block": {
+          "block": 3152,
+          "allow": 68
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 68
+      },
+      "block_by_risk_category": {
+        "abuse": {
+          "blocked": 140,
+          "total": 140
+        },
+        "data_exfiltration": {
+          "blocked": 280,
+          "total": 280
+        },
+        "fraud_social_engineering": {
+          "blocked": 280,
+          "total": 280
+        },
+        "harmful_content": {
+          "blocked": 140,
+          "total": 140
+        },
+        "indirect_injection": {
+          "blocked": 280,
+          "total": 280
+        },
+        "jailbreak": {
+          "blocked": 280,
+          "total": 280
+        },
+        "privilege_escalation": {
+          "blocked": 280,
+          "total": 280
+        },
+        "prompt_injection": {
+          "blocked": 212,
+          "total": 280
+        },
+        "system_prompt_extraction": {
+          "blocked": 280,
+          "total": 280
+        },
+        "system_prompt_override": {
+          "blocked": 280,
+          "total": 280
+        },
+        "tool_abuse": {
+          "blocked": 420,
+          "total": 420
+        },
+        "unauthorized_data_access": {
+          "blocked": 280,
+          "total": 280
+        }
+      },
+      "block_by_risk_level": {
+        "critical": {
+          "blocked": 560,
+          "total": 560
+        },
+        "high": {
+          "blocked": 2172,
+          "total": 2240
+        },
+        "low": {
+          "blocked": 140,
+          "total": 140
+        },
+        "medium": {
+          "blocked": 280,
+          "total": 280
+        }
+      },
+      "category_errors": [
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "fraud_social_engineering",
+          "count": 69
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "none",
+          "count": 68
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "system_prompt_extraction",
+          "count": 67
+        },
+        {
+          "expected": "none",
+          "predicted": "system_prompt_override",
+          "count": 17
+        },
+        {
+          "expected": "none",
+          "predicted": "unauthorized_data_access",
+          "count": 8
+        },
+        {
+          "expected": "tool_abuse",
+          "predicted": "system_prompt_override",
+          "count": 4
+        },
+        {
+          "expected": "sensitive_action",
+          "predicted": "system_prompt_override",
+          "count": 3
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "none",
+          "predicted": "data_exfiltration",
+          "count": 2
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "fraud_social_engineering",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "jailbreak",
+          "count": 1
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "data_exfiltration",
+          "count": 1
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "abuse",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "indirect_injection",
+          "count": 1
+        }
+      ]
+    },
+    "holdout": {
+      "n": 3000,
+      "decision_correct": 2722,
+      "category_correct": 2612,
+      "level_correct": 2658,
+      "all_correct": 2612,
+      "errors": 0,
+      "severe_total": 1200,
+      "severe_block": 1025,
+      "matrix": {
+        "allow": {
+          "allow": 1339,
+          "block": 71
+        },
+        "confirm": {
+          "confirm": 208,
+          "block": 2
+        },
+        "block": {
+          "block": 1175,
+          "allow": 205
+        }
+      },
+      "missed_categories": {
+        "system_prompt_override": 32,
+        "jailbreak": 57,
+        "prompt_injection": 27,
+        "unauthorized_data_access": 51,
+        "abuse": 28,
+        "harmful_content": 2,
+        "system_prompt_extraction": 2,
+        "data_exfiltration": 1,
+        "indirect_injection": 5
+      },
+      "block_by_risk_category": {
+        "abuse": {
+          "blocked": 32,
+          "total": 60
+        },
+        "data_exfiltration": {
+          "blocked": 119,
+          "total": 120
+        },
+        "fraud_social_engineering": {
+          "blocked": 120,
+          "total": 120
+        },
+        "harmful_content": {
+          "blocked": 58,
+          "total": 60
+        },
+        "indirect_injection": {
+          "blocked": 115,
+          "total": 120
+        },
+        "jailbreak": {
+          "blocked": 63,
+          "total": 120
+        },
+        "privilege_escalation": {
+          "blocked": 120,
+          "total": 120
+        },
+        "prompt_injection": {
+          "blocked": 93,
+          "total": 120
+        },
+        "system_prompt_extraction": {
+          "blocked": 118,
+          "total": 120
+        },
+        "system_prompt_override": {
+          "blocked": 88,
+          "total": 120
+        },
+        "tool_abuse": {
+          "blocked": 180,
+          "total": 180
+        },
+        "unauthorized_data_access": {
+          "blocked": 69,
+          "total": 120
+        }
+      },
+      "block_by_risk_level": {
+        "critical": {
+          "blocked": 237,
+          "total": 240
+        },
+        "high": {
+          "blocked": 788,
+          "total": 960
+        },
+        "low": {
+          "blocked": 32,
+          "total": 60
+        },
+        "medium": {
+          "blocked": 118,
+          "total": 120
+        }
+      },
+      "category_errors": [
+        {
+          "expected": "jailbreak",
+          "predicted": "none",
+          "count": 57
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "none",
+          "count": 51
+        },
+        {
+          "expected": "none",
+          "predicted": "fraud_social_engineering",
+          "count": 46
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "none",
+          "count": 32
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "system_prompt_extraction",
+          "count": 29
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "fraud_social_engineering",
+          "count": 29
+        },
+        {
+          "expected": "abuse",
+          "predicted": "none",
+          "count": 28
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "none",
+          "count": 27
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "harmful_content",
+          "count": 21
+        },
+        {
+          "expected": "none",
+          "predicted": "harmful_content",
+          "count": 10
+        },
+        {
+          "expected": "none",
+          "predicted": "system_prompt_override",
+          "count": 9
+        },
+        {
+          "expected": "indirect_injection",
+          "predicted": "none",
+          "count": 5
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "system_prompt_extraction",
+          "count": 4
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "system_prompt_override",
+          "count": 4
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "jailbreak",
+          "count": 3
+        },
+        {
+          "expected": "none",
+          "predicted": "privilege_escalation",
+          "count": 3
+        },
+        {
+          "expected": "jailbreak",
+          "predicted": "system_prompt_override",
+          "count": 3
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "data_exfiltration",
+          "count": 2
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "none",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "none",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "jailbreak",
+          "count": 2
+        },
+        {
+          "expected": "none",
+          "predicted": "indirect_injection",
+          "count": 2
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "sensitive_action",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "system_prompt_override",
+          "count": 2
+        },
+        {
+          "expected": "none",
+          "predicted": "jailbreak",
+          "count": 1
+        },
+        {
+          "expected": "abuse",
+          "predicted": "fraud_social_engineering",
+          "count": 1
+        },
+        {
+          "expected": "abuse",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "data_exfiltration",
+          "predicted": "none",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "fraud_social_engineering",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "tool_abuse",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "prompt_injection",
+          "count": 1
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "fraud_social_engineering",
+          "count": 1
+        }
+      ]
+    },
+    "total": {
+      "n": 10000,
+      "decision_correct": 9621,
+      "category_correct": 9360,
+      "level_correct": 9383,
+      "all_correct": 9259,
+      "errors": 0,
+      "severe_total": 4000,
+      "severe_block": 3757,
+      "matrix": {
+        "allow": {
+          "allow": 4599,
+          "block": 101
+        },
+        "confirm": {
+          "confirm": 695,
+          "block": 5
+        },
+        "block": {
+          "block": 4327,
+          "allow": 273
+        }
+      },
+      "missed_categories": {
+        "prompt_injection": 95,
+        "system_prompt_override": 32,
+        "jailbreak": 57,
+        "unauthorized_data_access": 51,
+        "abuse": 28,
+        "harmful_content": 2,
+        "system_prompt_extraction": 2,
+        "data_exfiltration": 1,
+        "indirect_injection": 5
+      },
+      "block_by_risk_category": {
+        "abuse": {
+          "blocked": 172,
+          "total": 200
+        },
+        "data_exfiltration": {
+          "blocked": 399,
+          "total": 400
+        },
+        "fraud_social_engineering": {
+          "blocked": 400,
+          "total": 400
+        },
+        "harmful_content": {
+          "blocked": 198,
+          "total": 200
+        },
+        "indirect_injection": {
+          "blocked": 395,
+          "total": 400
+        },
+        "jailbreak": {
+          "blocked": 343,
+          "total": 400
+        },
+        "privilege_escalation": {
+          "blocked": 400,
+          "total": 400
+        },
+        "prompt_injection": {
+          "blocked": 305,
+          "total": 400
+        },
+        "system_prompt_extraction": {
+          "blocked": 398,
+          "total": 400
+        },
+        "system_prompt_override": {
+          "blocked": 368,
+          "total": 400
+        },
+        "tool_abuse": {
+          "blocked": 600,
+          "total": 600
+        },
+        "unauthorized_data_access": {
+          "blocked": 349,
+          "total": 400
+        }
+      },
+      "block_by_risk_level": {
+        "critical": {
+          "blocked": 797,
+          "total": 800
+        },
+        "high": {
+          "blocked": 2960,
+          "total": 3200
+        },
+        "low": {
+          "blocked": 172,
+          "total": 200
+        },
+        "medium": {
+          "blocked": 398,
+          "total": 400
+        }
+      },
+      "category_errors": [
+        {
+          "expected": "prompt_injection",
+          "predicted": "none",
+          "count": 95
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "system_prompt_extraction",
+          "count": 71
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "fraud_social_engineering",
+          "count": 69
+        },
+        {
+          "expected": "jailbreak",
+          "predicted": "none",
+          "count": 57
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "none",
+          "count": 51
+        },
+        {
+          "expected": "none",
+          "predicted": "fraud_social_engineering",
+          "count": 47
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "none",
+          "count": 32
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "system_prompt_extraction",
+          "count": 29
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "fraud_social_engineering",
+          "count": 29
+        },
+        {
+          "expected": "abuse",
+          "predicted": "none",
+          "count": 28
+        },
+        {
+          "expected": "none",
+          "predicted": "system_prompt_override",
+          "count": 26
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "harmful_content",
+          "count": 21
+        },
+        {
+          "expected": "none",
+          "predicted": "harmful_content",
+          "count": 10
+        },
+        {
+          "expected": "none",
+          "predicted": "unauthorized_data_access",
+          "count": 8
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "system_prompt_override",
+          "count": 6
+        },
+        {
+          "expected": "tool_abuse",
+          "predicted": "system_prompt_override",
+          "count": 5
+        },
+        {
+          "expected": "sensitive_action",
+          "predicted": "system_prompt_override",
+          "count": 5
+        },
+        {
+          "expected": "indirect_injection",
+          "predicted": "none",
+          "count": 5
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "system_prompt_override",
+          "count": 4
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "system_prompt_override",
+          "count": 4
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "system_prompt_override",
+          "count": 3
+        },
+        {
+          "expected": "none",
+          "predicted": "indirect_injection",
+          "count": 3
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "jailbreak",
+          "count": 3
+        },
+        {
+          "expected": "none",
+          "predicted": "privilege_escalation",
+          "count": 3
+        },
+        {
+          "expected": "jailbreak",
+          "predicted": "system_prompt_override",
+          "count": 3
+        },
+        {
+          "expected": "none",
+          "predicted": "jailbreak",
+          "count": 2
+        },
+        {
+          "expected": "none",
+          "predicted": "data_exfiltration",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "data_exfiltration",
+          "count": 2
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "none",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "none",
+          "count": 2
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "jailbreak",
+          "count": 2
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "data_exfiltration",
+          "count": 1
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "abuse",
+          "count": 1
+        },
+        {
+          "expected": "abuse",
+          "predicted": "fraud_social_engineering",
+          "count": 1
+        },
+        {
+          "expected": "abuse",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "data_exfiltration",
+          "predicted": "none",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "fraud_social_engineering",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "system_prompt_override",
+          "count": 1
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "prompt_injection",
+          "count": 1
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "fraud_social_engineering",
+          "count": 1
+        }
+      ]
+    }
+  },
+  "v8": {
+    "theater": {
+      "n": 1000,
+      "decision_correct": 997,
+      "category_correct": 997,
+      "level_correct": 997,
+      "all_correct": 997,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 467,
+          "block": 3
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "weather": {
+      "n": 1000,
+      "decision_correct": 1000,
+      "category_correct": 1000,
+      "level_correct": 1000,
+      "all_correct": 1000,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 470
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "bakery": {
+      "n": 1000,
+      "decision_correct": 997,
+      "category_correct": 997,
+      "level_correct": 997,
+      "all_correct": 997,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 467,
+          "block": 3
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "planetarium": {
+      "n": 1000,
+      "decision_correct": 996,
+      "category_correct": 996,
+      "level_correct": 996,
+      "all_correct": 996,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 466,
+          "block": 4
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "recycling": {
+      "n": 1000,
+      "decision_correct": 998,
+      "category_correct": 997,
+      "level_correct": 997,
+      "all_correct": 997,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 468,
+          "block": 2
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "ceramics": {
+      "n": 1000,
+      "decision_correct": 999,
+      "category_correct": 999,
+      "level_correct": 999,
+      "all_correct": 999,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 469,
+          "block": 1
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "postal": {
+      "n": 1000,
+      "decision_correct": 996,
+      "category_correct": 996,
+      "level_correct": 996,
+      "all_correct": 996,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 400,
+      "matrix": {
+        "allow": {
+          "allow": 466,
+          "block": 4
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 460
+        }
+      },
+      "missed_categories": {}
+    },
+    "translation": {
+      "n": 1000,
+      "decision_correct": 932,
+      "category_correct": 917,
+      "level_correct": 931,
+      "all_correct": 917,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 357,
+      "matrix": {
+        "allow": {
+          "allow": 448,
+          "block": 22
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 414,
+          "allow": 46
+        }
+      },
+      "missed_categories": {
+        "system_prompt_override": 12,
+        "prompt_injection": 10,
+        "jailbreak": 18,
+        "abuse": 3,
+        "indirect_injection": 1,
+        "unauthorized_data_access": 2
+      }
+    },
+    "lighthouse": {
+      "n": 1000,
+      "decision_correct": 939,
+      "category_correct": 923,
+      "level_correct": 939,
+      "all_correct": 923,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 359,
+      "matrix": {
+        "allow": {
+          "allow": 455,
+          "block": 15
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "allow": 46,
+          "block": 414
+        }
+      },
+      "missed_categories": {
+        "abuse": 5,
+        "system_prompt_override": 9,
+        "prompt_injection": 9,
+        "jailbreak": 19,
+        "unauthorized_data_access": 4
+      }
+    },
+    "weaving": {
+      "n": 1000,
+      "decision_correct": 935,
+      "category_correct": 921,
+      "level_correct": 935,
+      "all_correct": 921,
+      "errors": 0,
+      "severe_total": 400,
+      "severe_block": 356,
+      "matrix": {
+        "allow": {
+          "allow": 451,
+          "block": 19
+        },
+        "confirm": {
+          "confirm": 70
+        },
+        "block": {
+          "block": 414,
+          "allow": 46
+        }
+      },
+      "missed_categories": {
+        "jailbreak": 22,
+        "prompt_injection": 9,
+        "unauthorized_data_access": 1,
+        "system_prompt_override": 11,
+        "abuse": 2,
+        "indirect_injection": 1
+      }
+    },
+    "development": {
+      "n": 7000,
+      "decision_correct": 6983,
+      "category_correct": 6982,
+      "level_correct": 6982,
+      "all_correct": 6982,
+      "errors": 0,
+      "severe_total": 2800,
+      "severe_block": 2800,
+      "matrix": {
+        "allow": {
+          "allow": 3273,
+          "block": 17
+        },
+        "confirm": {
+          "confirm": 490
+        },
+        "block": {
+          "block": 3220
+        }
+      },
+      "missed_categories": {},
+      "block_by_risk_category": {
+        "abuse": {
+          "blocked": 140,
+          "total": 140
+        },
+        "data_exfiltration": {
+          "blocked": 280,
+          "total": 280
+        },
+        "fraud_social_engineering": {
+          "blocked": 280,
+          "total": 280
+        },
+        "harmful_content": {
+          "blocked": 140,
+          "total": 140
+        },
+        "indirect_injection": {
+          "blocked": 280,
+          "total": 280
+        },
+        "jailbreak": {
+          "blocked": 280,
+          "total": 280
+        },
+        "privilege_escalation": {
+          "blocked": 280,
+          "total": 280
+        },
+        "prompt_injection": {
+          "blocked": 280,
+          "total": 280
+        },
+        "system_prompt_extraction": {
+          "blocked": 280,
+          "total": 280
+        },
+        "system_prompt_override": {
+          "blocked": 280,
+          "total": 280
+        },
+        "tool_abuse": {
+          "blocked": 420,
+          "total": 420
+        },
+        "unauthorized_data_access": {
+          "blocked": 280,
+          "total": 280
+        }
+      },
+      "block_by_risk_level": {
+        "critical": {
+          "blocked": 560,
+          "total": 560
+        },
+        "high": {
+          "blocked": 2240,
+          "total": 2240
+        },
+        "low": {
+          "blocked": 140,
+          "total": 140
+        },
+        "medium": {
+          "blocked": 280,
+          "total": 280
+        }
+      },
+      "category_errors": [
+        {
+          "expected": "none",
+          "predicted": "unauthorized_data_access",
+          "count": 14
+        },
+        {
+          "expected": "none",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "unauthorized_data_access",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "jailbreak",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "data_exfiltration",
+          "count": 1
+        }
+      ]
+    },
+    "holdout": {
+      "n": 3000,
+      "decision_correct": 2806,
+      "category_correct": 2761,
+      "level_correct": 2805,
+      "all_correct": 2761,
+      "errors": 0,
+      "severe_total": 1200,
+      "severe_block": 1072,
+      "matrix": {
+        "allow": {
+          "allow": 1354,
+          "block": 56
+        },
+        "confirm": {
+          "confirm": 210
+        },
+        "block": {
+          "block": 1242,
+          "allow": 138
+        }
+      },
+      "missed_categories": {
+        "system_prompt_override": 32,
+        "prompt_injection": 28,
+        "jailbreak": 59,
+        "abuse": 10,
+        "indirect_injection": 2,
+        "unauthorized_data_access": 7
+      },
+      "block_by_risk_category": {
+        "abuse": {
+          "blocked": 50,
+          "total": 60
+        },
+        "data_exfiltration": {
+          "blocked": 120,
+          "total": 120
+        },
+        "fraud_social_engineering": {
+          "blocked": 120,
+          "total": 120
+        },
+        "harmful_content": {
+          "blocked": 60,
+          "total": 60
+        },
+        "indirect_injection": {
+          "blocked": 118,
+          "total": 120
+        },
+        "jailbreak": {
+          "blocked": 61,
+          "total": 120
+        },
+        "privilege_escalation": {
+          "blocked": 120,
+          "total": 120
+        },
+        "prompt_injection": {
+          "blocked": 92,
+          "total": 120
+        },
+        "system_prompt_extraction": {
+          "blocked": 120,
+          "total": 120
+        },
+        "system_prompt_override": {
+          "blocked": 88,
+          "total": 120
+        },
+        "tool_abuse": {
+          "blocked": 180,
+          "total": 180
+        },
+        "unauthorized_data_access": {
+          "blocked": 113,
+          "total": 120
+        }
+      },
+      "block_by_risk_level": {
+        "critical": {
+          "blocked": 240,
+          "total": 240
+        },
+        "high": {
+          "blocked": 832,
+          "total": 960
+        },
+        "low": {
+          "blocked": 50,
+          "total": 60
+        },
+        "medium": {
+          "blocked": 120,
+          "total": 120
+        }
+      },
+      "category_errors": [
+        {
+          "expected": "jailbreak",
+          "predicted": "none",
+          "count": 59
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "none",
+          "count": 32
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "fraud_social_engineering",
+          "count": 30
+        },
+        {
+          "expected": "none",
+          "predicted": "fraud_social_engineering",
+          "count": 28
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "none",
+          "count": 28
+        },
+        {
+          "expected": "none",
+          "predicted": "harmful_content",
+          "count": 14
+        },
+        {
+          "expected": "abuse",
+          "predicted": "none",
+          "count": 10
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "unauthorized_data_access",
+          "count": 9
+        },
+        {
+          "expected": "none",
+          "predicted": "unauthorized_data_access",
+          "count": 7
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "none",
+          "count": 7
+        },
+        {
+          "expected": "none",
+          "predicted": "indirect_injection",
+          "count": 4
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "prompt_injection",
+          "count": 3
+        },
+        {
+          "expected": "indirect_injection",
+          "predicted": "none",
+          "count": 2
+        },
+        {
+          "expected": "none",
+          "predicted": "jailbreak",
+          "count": 2
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "indirect_injection",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "unauthorized_data_access",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "system_prompt_extraction",
+          "count": 1
+        }
+      ]
+    },
+    "total": {
+      "n": 10000,
+      "decision_correct": 9789,
+      "category_correct": 9743,
+      "level_correct": 9787,
+      "all_correct": 9743,
+      "errors": 0,
+      "severe_total": 4000,
+      "severe_block": 3872,
+      "matrix": {
+        "allow": {
+          "allow": 4627,
+          "block": 73
+        },
+        "confirm": {
+          "confirm": 700
+        },
+        "block": {
+          "block": 4462,
+          "allow": 138
+        }
+      },
+      "missed_categories": {
+        "system_prompt_override": 32,
+        "prompt_injection": 28,
+        "jailbreak": 59,
+        "abuse": 10,
+        "indirect_injection": 2,
+        "unauthorized_data_access": 7
+      },
+      "block_by_risk_category": {
+        "abuse": {
+          "blocked": 190,
+          "total": 200
+        },
+        "data_exfiltration": {
+          "blocked": 400,
+          "total": 400
+        },
+        "fraud_social_engineering": {
+          "blocked": 400,
+          "total": 400
+        },
+        "harmful_content": {
+          "blocked": 200,
+          "total": 200
+        },
+        "indirect_injection": {
+          "blocked": 398,
+          "total": 400
+        },
+        "jailbreak": {
+          "blocked": 341,
+          "total": 400
+        },
+        "privilege_escalation": {
+          "blocked": 400,
+          "total": 400
+        },
+        "prompt_injection": {
+          "blocked": 372,
+          "total": 400
+        },
+        "system_prompt_extraction": {
+          "blocked": 400,
+          "total": 400
+        },
+        "system_prompt_override": {
+          "blocked": 368,
+          "total": 400
+        },
+        "tool_abuse": {
+          "blocked": 600,
+          "total": 600
+        },
+        "unauthorized_data_access": {
+          "blocked": 393,
+          "total": 400
+        }
+      },
+      "block_by_risk_level": {
+        "critical": {
+          "blocked": 800,
+          "total": 800
+        },
+        "high": {
+          "blocked": 3072,
+          "total": 3200
+        },
+        "low": {
+          "blocked": 190,
+          "total": 200
+        },
+        "medium": {
+          "blocked": 400,
+          "total": 400
+        }
+      },
+      "category_errors": [
+        {
+          "expected": "jailbreak",
+          "predicted": "none",
+          "count": 59
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "none",
+          "count": 32
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "fraud_social_engineering",
+          "count": 30
+        },
+        {
+          "expected": "none",
+          "predicted": "fraud_social_engineering",
+          "count": 28
+        },
+        {
+          "expected": "prompt_injection",
+          "predicted": "none",
+          "count": 28
+        },
+        {
+          "expected": "none",
+          "predicted": "unauthorized_data_access",
+          "count": 21
+        },
+        {
+          "expected": "none",
+          "predicted": "harmful_content",
+          "count": 14
+        },
+        {
+          "expected": "abuse",
+          "predicted": "none",
+          "count": 10
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "unauthorized_data_access",
+          "count": 9
+        },
+        {
+          "expected": "unauthorized_data_access",
+          "predicted": "none",
+          "count": 7
+        },
+        {
+          "expected": "none",
+          "predicted": "indirect_injection",
+          "count": 4
+        },
+        {
+          "expected": "none",
+          "predicted": "jailbreak",
+          "count": 3
+        },
+        {
+          "expected": "system_prompt_override",
+          "predicted": "prompt_injection",
+          "count": 3
+        },
+        {
+          "expected": "indirect_injection",
+          "predicted": "none",
+          "count": 2
+        },
+        {
+          "expected": "none",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "system_prompt_extraction",
+          "predicted": "unauthorized_data_access",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "data_exfiltration",
+          "count": 1
+        },
+        {
+          "expected": "privilege_escalation",
+          "predicted": "indirect_injection",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "unauthorized_data_access",
+          "count": 1
+        },
+        {
+          "expected": "harmful_content",
+          "predicted": "tool_abuse",
+          "count": 1
+        },
+        {
+          "expected": "none",
+          "predicted": "system_prompt_extraction",
+          "count": 1
+        }
+      ]
+    }
+  }
+}

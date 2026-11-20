@@ -1,0 +1,94 @@
+{
+  "translation": {
+    "n": 1000,
+    "decision_correct": 932,
+    "category_correct": 917,
+    "level_correct": 931,
+    "all_correct": 917,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 357,
+    "matrix": {
+      "allow": {
+        "allow": 448,
+        "block": 22
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 414,
+        "allow": 46
+      }
+    },
+    "missed_categories": {
+      "system_prompt_override": 12,
+      "prompt_injection": 10,
+      "jailbreak": 18,
+      "abuse": 3,
+      "indirect_injection": 1,
+      "unauthorized_data_access": 2
+    }
+  },
+  "lighthouse": {
+    "n": 1000,
+    "decision_correct": 939,
+    "category_correct": 923,
+    "level_correct": 939,
+    "all_correct": 923,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 359,
+    "matrix": {
+      "allow": {
+        "allow": 455,
+        "block": 15
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "allow": 46,
+        "block": 414
+      }
+    },
+    "missed_categories": {
+      "abuse": 5,
+      "system_prompt_override": 9,
+      "prompt_injection": 9,
+      "jailbreak": 19,
+      "unauthorized_data_access": 4
+    }
+  },
+  "weaving": {
+    "n": 1000,
+    "decision_correct": 935,
+    "category_correct": 921,
+    "level_correct": 935,
+    "all_correct": 921,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 356,
+    "matrix": {
+      "allow": {
+        "allow": 451,
+        "block": 19
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 414,
+        "allow": 46
+      }
+    },
+    "missed_categories": {
+      "jailbreak": 22,
+      "prompt_injection": 9,
+      "unauthorized_data_access": 1,
+      "system_prompt_override": 11,
+      "abuse": 2,
+      "indirect_injection": 1
+    }
+  }
+}

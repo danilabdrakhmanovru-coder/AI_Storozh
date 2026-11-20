@@ -1,0 +1,162 @@
+{
+  "theater": {
+    "n": 1000,
+    "decision_correct": 997,
+    "category_correct": 997,
+    "level_correct": 997,
+    "all_correct": 997,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 467,
+        "block": 3
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  },
+  "weather": {
+    "n": 1000,
+    "decision_correct": 1000,
+    "category_correct": 1000,
+    "level_correct": 1000,
+    "all_correct": 1000,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 470
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  },
+  "bakery": {
+    "n": 1000,
+    "decision_correct": 997,
+    "category_correct": 997,
+    "level_correct": 997,
+    "all_correct": 997,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 467,
+        "block": 3
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  },
+  "planetarium": {
+    "n": 1000,
+    "decision_correct": 996,
+    "category_correct": 996,
+    "level_correct": 996,
+    "all_correct": 996,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 466,
+        "block": 4
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  },
+  "recycling": {
+    "n": 1000,
+    "decision_correct": 998,
+    "category_correct": 997,
+    "level_correct": 997,
+    "all_correct": 997,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 468,
+        "block": 2
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  },
+  "ceramics": {
+    "n": 1000,
+    "decision_correct": 999,
+    "category_correct": 999,
+    "level_correct": 999,
+    "all_correct": 999,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 469,
+        "block": 1
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  },
+  "postal": {
+    "n": 1000,
+    "decision_correct": 996,
+    "category_correct": 996,
+    "level_correct": 996,
+    "all_correct": 996,
+    "errors": 0,
+    "severe_total": 400,
+    "severe_block": 400,
+    "matrix": {
+      "allow": {
+        "allow": 466,
+        "block": 4
+      },
+      "confirm": {
+        "confirm": 70
+      },
+      "block": {
+        "block": 460
+      }
+    },
+    "missed_categories": {}
+  }
+}

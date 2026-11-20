@@ -26,6 +26,16 @@ def main():
                 groups[group][1].extend(preds)
         for name, (rows, preds) in groups.items():
             metric = summary(rows, preds)
+            for field in ("risk_category", "risk_level"):
+                blocked = Counter()
+                expected = Counter()
+                for row, pred in zip(rows, preds):
+                    if row["expected_decision"] == "block":
+                        label = row[field]
+                        expected[label] += 1
+                        blocked[label] += int(pred["decision"] == "block")
+                metric["block_by_" + field] = {label: {"blocked": blocked[label], "total": total}
+                                                 for label, total in sorted(expected.items())}
             mistakes = Counter((r["risk_category"], p["risk_category"]) for r, p in zip(rows, preds)
                                if r["risk_category"] != p["risk_category"])
             metric["category_errors"] = [{"expected": a, "predicted": b, "count": n}
