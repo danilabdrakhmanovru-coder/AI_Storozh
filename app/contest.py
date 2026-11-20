@@ -245,12 +245,13 @@ def _inspect(req, thresholds, raw_policy):
             access_result['_operation_level'] = {'block':'critical' if destructive else 'high',
                 'confirm':'high' if destructive else 'medium', 'allow':'none'}[decision]
     try:
-        category = predict(req, check_danger=not decisions)
+        prioritize_jailbreak = 'jailbreak' in policy['always_block']
+        category = predict(req, check_danger=not decisions, prioritize_jailbreak=prioritize_jailbreak)
         if ctx.attachments and category in policy['always_block'] and category != 'indirect_injection':
             for attachment in ctx.attachments:
                 doc = req.model_copy(update={'user_prompt':attachment.content,
                     'context':ctx.model_copy(update={'history':[], 'attachments':[]})})
-                if predict(doc) == category:
+                if predict(doc, prioritize_jailbreak=prioritize_jailbreak) == category:
                     return result('block', 'indirect_injection', f'Во вложении обнаружена инструкция категории {category}.')
     except Exception as exc:
         raise InferenceUnavailable('Модель категорий недоступна.') from exc
@@ -260,7 +261,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v9 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v10 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result

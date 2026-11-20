@@ -6,7 +6,7 @@ import unicodedata
 import joblib
 import numpy as np
 from .intent_features import view
-from .jailbreak_model import detects as detects_jailbreak
+from .jailbreak_intent import detects as detects_jailbreak, may_reclassify
 
 MODEL = Path(__file__).resolve().parents[1] / "experiment/v3/categories.joblib"
 
@@ -40,18 +40,22 @@ def risk_level(req, category):
     return str(estimator.predict([view(req)])[0])
 
 
-def predict(req, *, check_danger=False):
+def predict(req, *, check_danger=False, prioritize_jailbreak=True):
     artifact = load_current()
     model = artifact['model']
     text = [view(req)]
     scores = model.decision_function(text)[0]
     order = np.argsort(scores)
     if check_danger and artifact['danger'].decision_function(text)[0] >= artifact['danger_threshold']:
-        return next(model.classes_[i] for i in reversed(order)
-                    if model.classes_[i] not in {'none', 'sensitive_action'})
-    label = model.classes_[order[-1]]
-    if scores[order[-1]] - scores[order[-2]] < artifact['min_margin']:
+        label = next(model.classes_[i] for i in reversed(order)
+                     if model.classes_[i] not in {'none', 'sensitive_action'})
+    elif scores[order[-1]] - scores[order[-2]] < artifact['min_margin']:
         label = None
-    if label in {None, 'none', 'sensitive_action'} and detects_jailbreak(req):
+    else:
+        label = model.classes_[order[-1]]
+    if label == 'jailbreak':
+        return label
+    if (label in {None, 'none', 'sensitive_action'} or
+            (prioritize_jailbreak and may_reclassify(req))) and detects_jailbreak(req):
         return 'jailbreak'
     return label

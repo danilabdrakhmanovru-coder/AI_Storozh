@@ -15,7 +15,7 @@ from experiment.v6.train import training_rows
 OUT = Path(__file__).resolve().parent
 
 
-def main():
+def main(*, extra_rows=(), encode=model_text, destination=MODEL):
     excluded = set(json.loads((ROOT / "experiment/v3/split.json").read_bytes())["holdout_ids"])
     rows = [r for r in lines(ROOT / "artifacts/astra_public/dev.jsonl") if r["id"] not in excluded]
     rows.extend(r for r in lines(ROOT / "experiment/synthetic1000/cases.jsonl") if r["tags"][0] == "bank")
@@ -29,9 +29,10 @@ def main():
             {"role": "assistant", "content": "Yes." if english else "Да."}]}
         rows.append({**r, "context": context})
 
+    rows.extend(extra_rows)
     examples = {}
     for r in rows:
-        text = model_text(ContestRequest.model_validate(r))
+        text = encode(ContestRequest.model_validate(r))
         label = r["risk_category"] == "jailbreak"
         if text in examples and examples[text] != label:
             raise ValueError("Conflicting jailbreak labels for identical input")
@@ -42,7 +43,7 @@ def main():
         ("char", TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), min_df=2, sublinear_tf=True)),
     ]), LinearSVC(class_weight="balanced", random_state=42))
     model.fit(list(examples), list(examples.values()))
-    joblib.dump(model, MODEL, compress=3)
+    joblib.dump(model, destination, compress=3)
     print(f"Unique train inputs: {len(examples)} including {sum(examples.values())} jailbreaks")
 
 

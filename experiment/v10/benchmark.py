@@ -109,6 +109,10 @@ def run(job):
 
 
 def main(version, part):
+    from app.category_model import detects_jailbreak
+    expected_module = "app.jailbreak_intent" if version == "v10" else "app.jailbreak_model"
+    if detects_jailbreak.__module__ != expected_module:
+        raise ValueError(f"Checkout the {version} implementation before recording its predictions")
     jobs = []
     if part == "holdout":
         jobs.append(("holdout", holdout(), version))
