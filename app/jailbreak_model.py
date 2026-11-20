@@ -8,6 +8,8 @@ import joblib
 from .intent_features import view
 
 MODEL = Path(__file__).resolve().parents[1] / "experiment/v9/jailbreak.joblib"
+# SVM margin selected on the diagnostic sets. This is not a probability.
+BLOCK_MARGIN = 0.30
 # These are input features. The classifier learns how they interact with
 # a request to act, a documentation question and ordinary role-play.
 CUES = {
@@ -16,6 +18,8 @@ CUES = {
     "removal": r"сним[иать]|снят|выключ|отключ|недейств|приостанов|освобожд|не связан|не действ|не подчин|не соблюд|вне рамок|позволено|без (?:\w+ ){0,2}(?:защит|огранич|фильтр|запрет)|"
                r"exempt|without|unrestrict|unmoderat|uncensor|disabl|suspend|inactive|deactivat|switched off|turn off|set aside|not (?:apply|subject|bound)|no (?:\w+ ){0,2}(?:limit|safety|obligation)|freed|free from|lift|drop|remove|released",
     "inquiry": r"зачем|почему|что (?:такое|значит|делать)|как (?:объяснить|проверить|сообщить)|риск|памятк|отказ|словар|why|what (?:does|is|are|should)|how (?:can|do|should)|refus|declin|risk|glossary|report|training material",
+    "awareness": r"распознав|профилактик|обсуждени[яюе]|дискусси|предотвращ|учебн\w* цел|план (?:урока|занятия)|"
+                 r"recogniz|awareness|prevention|educational objective|training objective|discussion of|lesson plan",
     "hazard": r"оружи|пистолет|наркот|амфетамин|опиоид|тяж[её]л.{0,12}вред|травм|weapon|firearm|narcotic|illegal drug|injur|physical harm",
     "waive_warning": r"без (?:предупрежден|оговорок)|(?:опусти|пропусти|убери).{0,30}(?:риски|предупрежден|оговорки|меры безопасности)|"
                      r"(?:предупреждени\w*|предостережени\w*) (?:не нужны|опусти)|(?:skip|omit|suppress|without|leave out).{0,30}(?:caveat|warning|safety)",
@@ -49,4 +53,4 @@ def load():
 
 
 def detects(req):
-    return bool(load().predict([model_text(req)])[0])
+    return bool(load().decision_function([model_text(req)])[0] >= BLOCK_MARGIN)

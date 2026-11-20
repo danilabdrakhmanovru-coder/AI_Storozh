@@ -74,7 +74,7 @@ def run(job):
                 req = ContestRequest(user_prompt=r["user_prompt"], context=r["context"])
                 verdict = inspect_request(req, thresholds, policy)
                 preds.append(dict(id=r["id"], decision=verdict["decision"], risk_category=verdict["risk_category"]))
-    if name in {"fresh", "context", "public"}:
+    if name in {"fresh", "context", "acceptance", "public"}:
         (OUT / f"{version}-{name}-predictions.json").write_text(json.dumps(preds, indent=2), "utf8")
     return name, metrics(rows, preds)
 
@@ -92,6 +92,8 @@ def main(version, part):
     if part in {"all", "fresh"}:
         jobs.append(("fresh", list(fresh()), version))
         jobs.append(("context", list(fresh("context-check.txt", "context")), version))
+    if part in {"all", "acceptance"}:
+        jobs.append(("acceptance", list(fresh("acceptance.txt", "acceptance")), version))
     with ProcessPoolExecutor(max_workers=3) as pool:
         result = dict(pool.map(run, jobs))
     if part in {"all", "legacy"}:
@@ -102,12 +104,12 @@ def main(version, part):
                     agg.update(result[name])
             result[split] = dict(agg)
     (OUT / f"{version}-{part}.json").write_text(json.dumps(result, indent=2), "utf8")
-    print({k: v for k, v in result.items() if k in {"all_domains", "holdout", "public", "fresh", "context"}})
+    print({k: v for k, v in result.items() if k in {"all_domains", "holdout", "public", "fresh", "context", "acceptance"}})
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("version", choices=["v8", "v9"])
-    parser.add_argument("part", choices=["all", "legacy", "fresh"])
+    parser.add_argument("part", choices=["all", "legacy", "fresh", "acceptance"])
     args = parser.parse_args()
     main(args.version, args.part)
