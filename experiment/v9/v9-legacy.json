@@ -1,0 +1,145 @@
+{
+  "theater": {
+    "decision_correct": 997,
+    "category_correct": 997,
+    "n": 1000,
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40,
+    "benign": 470,
+    "false_block": 3,
+    "false_confirm": 0
+  },
+  "weather": {
+    "decision_correct": 1000,
+    "category_correct": 1000,
+    "n": 1000,
+    "benign": 470,
+    "false_block": 0,
+    "false_confirm": 0,
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40
+  },
+  "bakery": {
+    "decision_correct": 997,
+    "category_correct": 997,
+    "n": 1000,
+    "benign": 470,
+    "false_block": 3,
+    "false_confirm": 0,
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40
+  },
+  "planetarium": {
+    "decision_correct": 996,
+    "category_correct": 996,
+    "n": 1000,
+    "benign": 470,
+    "false_block": 4,
+    "false_confirm": 0,
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40
+  },
+  "recycling": {
+    "benign": 470,
+    "false_block": 2,
+    "false_confirm": 0,
+    "decision_correct": 998,
+    "category_correct": 997,
+    "n": 1000,
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40
+  },
+  "ceramics": {
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40,
+    "decision_correct": 999,
+    "category_correct": 999,
+    "n": 1000,
+    "benign": 470,
+    "false_block": 1,
+    "false_confirm": 0
+  },
+  "postal": {
+    "decision_correct": 996,
+    "category_correct": 996,
+    "n": 1000,
+    "jailbreak": 40,
+    "blocked": 40,
+    "correct_jailbreak": 40,
+    "benign": 470,
+    "false_block": 4,
+    "false_confirm": 0
+  },
+  "translation": {
+    "decision_correct": 947,
+    "category_correct": 932,
+    "n": 1000,
+    "benign": 470,
+    "false_block": 22,
+    "false_confirm": 0,
+    "jailbreak": 40,
+    "blocked": 37,
+    "correct_jailbreak": 37
+  },
+  "lighthouse": {
+    "decision_correct": 957,
+    "category_correct": 941,
+    "n": 1000,
+    "benign": 470,
+    "false_block": 15,
+    "false_confirm": 0,
+    "jailbreak": 40,
+    "blocked": 39,
+    "correct_jailbreak": 39
+  },
+  "weaving": {
+    "benign": 470,
+    "false_block": 19,
+    "false_confirm": 0,
+    "decision_correct": 956,
+    "category_correct": 942,
+    "n": 1000,
+    "jailbreak": 40,
+    "blocked": 39,
+    "correct_jailbreak": 39
+  },
+  "public": {
+    "jailbreak": 9,
+    "blocked": 9,
+    "correct_jailbreak": 9,
+    "decision_correct": 129,
+    "category_correct": 120,
+    "n": 133,
+    "benign": 70,
+    "false_block": 3,
+    "false_confirm": 0
+  },
+  "all_domains": {
+    "decision_correct": 9843,
+    "category_correct": 9797,
+    "n": 10000,
+    "jailbreak": 400,
+    "blocked": 395,
+    "correct_jailbreak": 395,
+    "benign": 4700,
+    "false_block": 73,
+    "false_confirm": 0
+  },
+  "holdout": {
+    "decision_correct": 2860,
+    "category_correct": 2815,
+    "n": 3000,
+    "benign": 1410,
+    "false_block": 56,
+    "false_confirm": 0,
+    "jailbreak": 120,
+    "blocked": 115,
+    "correct_jailbreak": 115
+  }
+}

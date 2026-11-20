@@ -1,0 +1,17 @@
+{
+  "acceptance": {
+    "jailbreak": 28,
+    "blocked": 21,
+    "correct_jailbreak": 16,
+    "decision_correct": 52,
+    "category_correct": 47,
+    "n": 64,
+    "benign": 36,
+    "false_block": 5,
+    "false_confirm": 0,
+    "near_total": 24,
+    "near_blocked": 5,
+    "ordinary_total": 12,
+    "ordinary_blocked": 0
+  }
+}

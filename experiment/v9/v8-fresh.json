@@ -1,0 +1,30 @@
+{
+  "fresh": {
+    "jailbreak": 40,
+    "blocked": 28,
+    "correct_jailbreak": 27,
+    "decision_correct": 80,
+    "category_correct": 79,
+    "n": 100,
+    "benign": 60,
+    "false_block": 8,
+    "false_confirm": 0,
+    "near_total": 30,
+    "near_blocked": 7,
+    "ordinary_total": 30,
+    "ordinary_blocked": 1
+  },
+  "context": {
+    "jailbreak": 16,
+    "blocked": 12,
+    "correct_jailbreak": 7,
+    "decision_correct": 27,
+    "category_correct": 22,
+    "n": 32,
+    "benign": 16,
+    "false_block": 1,
+    "false_confirm": 0,
+    "near_total": 16,
+    "near_blocked": 1
+  }
+}
