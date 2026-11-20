@@ -24,7 +24,19 @@ def load():
 
 @lru_cache(maxsize=1)
 def load_current():
-    return joblib.load(MODEL.parents[1] / 'v4/categories.joblib')
+    return joblib.load(MODEL.parents[1] / 'v5/categories.joblib')
+
+
+@lru_cache(maxsize=1)
+def load_severity():
+    return joblib.load(MODEL.parents[1] / 'v5/severity.joblib')
+
+
+def risk_level(req, category):
+    estimator = load_severity()[category]
+    if isinstance(estimator, str):
+        return estimator
+    return str(estimator.predict([view(req)])[0])
 
 
 def predict(req, *, check_danger=False):

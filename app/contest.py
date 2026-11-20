@@ -9,7 +9,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 from .classifier import classify
-from .category_model import predict
+from .category_model import predict, risk_level
 from .guard import COMPILED, normalize
 
 
@@ -46,7 +46,7 @@ def parse_policy(raw):
 TOOLS = {
     'restart_service': r'\b(?:перезапусти(?:те)?|рестартни|restart|restart_service|(?:инициируй|выполни|сделай) перезапуск)\b',
     'delete_resource': r'\b(?:удали(?:те)?|delete|remove|delete_resource|(?:запрашиваю|выполни|инициируй) удаление)\b',
-    'read_logs': r'(?:покажи|прочитай|выведи|посмотри|read|show|fetch).{0,40}(?:лог|журнал|logs)|\bread_logs\b',
+    'read_logs': r'(?:покажи|прочитай|выведи|открой|посмотри|read|show|fetch).{0,40}(?:лог|журнал|logs)|\bread_logs\b',
     'run_shell': r'(?:выполни|запусти|run|execute).{0,35}(?:команд|скрипт|shell|command|script|миграци|migration)|\b(?:run|выполни)\s+`?(?:df|du|ps|uptime|date)\b|\brun_shell\b|\b(?:масштабируй|deploy|scale|roll ?back|очисти кэш|поставь log_level)\b',
 }
 FORBIDDEN = {
@@ -111,7 +111,23 @@ def read_policy():
     return path.read_bytes()
 
 
+SINGLE_OPERATION = re.compile(
+    r'(?:(?:открой|прочитай|посмотри|покажи|выведи) (?:журнал|логи)(?: (?:приложения|сервиса))?|'
+    r'(?:read|show) (?:the )?(?:service )?logs (?:of|on)|'
+    r'(?:выполни|запусти) (?:shell-)?команду (?:проверки времени|для просмотра текущей даты) на|'
+    r'run (?:a |the )?shell command to display the (?:current )?date on|'
+    r'(?:перезапусти|restart)(?: сервис| службу| service)?|(?:удали|delete) (?:ресурс|resource)) '
+    r'(?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*[.!]?')
+
+
 def inspect_request(req, thresholds, raw_policy):
+    verdict = _inspect(req, thresholds, raw_policy)
+    policy_level = verdict.pop('_operation_level', None)
+    verdict['risk_level'] = policy_level or risk_level(req, verdict['risk_category'])
+    return verdict
+
+
+def _inspect(req, thresholds, raw_policy):
     policy = parse_policy(raw_policy)
     ctx = req.context
     agent = policy['agents'].get(ctx.target_agent, {})
@@ -171,21 +187,37 @@ def inspect_request(req, thresholds, raw_policy):
                 rule = role.get('tools', {}).get(tool, 'deny') if tool in agent.get('tools', []) else 'deny'
                 for env in matched or list(environments) or ['unknown']:
                     decision = access(rule, env)
-                    decisions.append((decision, f'{ctx.user_role}, {tool}, {env}: {decision}.'))
+                    decisions.append((decision, tool, env, f'{ctx.user_role}, {tool}, {env}: {decision}.'))
+    literal_operation = bool(decisions and not ctx.history and not ctx.attachments and SINGLE_OPERATION.fullmatch(text))
+    if decisions:
+        decision, tool, env, reason = max(decisions, key=lambda item: (
+            ['allow', 'confirm', 'block'].index(item[0]), item[1]=='delete_resource', item[2]=='prod'))
+        access_category = {'allow': 'none', 'confirm': 'sensitive_action', 'block': 'tool_abuse'}[decision]
+        access_result = result(decision, access_category, reason)
+        if (len(set(matched)) == 1 and tool == 'delete_resource') or literal_operation:
+            destructive = tool == 'delete_resource' and env == 'prod'
+            access_result['_operation_level'] = {'block':'critical' if destructive else 'high',
+                'confirm':'high' if destructive else 'medium', 'allow':'none'}[decision]
     try:
         category = predict(req, check_danger=not decisions)
+        if ctx.attachments and category in policy['always_block'] and category != 'indirect_injection':
+            for attachment in ctx.attachments:
+                doc = req.model_copy(update={'user_prompt':attachment.content,
+                    'context':ctx.model_copy(update={'history':[], 'attachments':[]})})
+                if predict(doc) == category:
+                    return result('block', 'indirect_injection', f'Во вложении обнаружена инструкция категории {category}.')
     except Exception:
         return result('block', 'tool_abuse', 'Модель категорий недоступна. Передача остановлена.')
-    if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v4 определила категорию {category}. Политика запрещает такие запросы.')
     score = classify(req.user_prompt)
     if score['status'] != 'ok':
         return result('block', 'tool_abuse', 'Классификатор недоступен, передача остановлена.')
+    if literal_operation:
+        return access_result
+    if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
+        return result('block', category, f'Модель v5 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
-        decision, reason = max(decisions, key=lambda item: ['allow', 'confirm', 'block'].index(item[0]))
-        category = {'allow': 'none', 'confirm': 'sensitive_action', 'block': 'tool_abuse'}[decision]
         if decision == 'block' or score['risk'] < thresholds['block']:
-            return result(decision, category, reason)
+            return access_result
     if score['risk'] >= thresholds['block']:
         return result('block', 'prompt_injection', f"Классификатор выявил риск ({score['risk']:.2f}).")
     return result('allow', 'none', 'Проверки текста и контекста не выявили нарушения политики.')

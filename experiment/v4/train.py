@@ -17,11 +17,12 @@ def lines(path):
     return [json.loads(l) for l in path.read_text('utf-8-sig').splitlines()]
 
 
-def main():
+def main(additional=(), destination=OUT/'categories.joblib'):
     hold=set(json.loads((ROOT/'experiment/v3/split.json').read_text())['holdout_ids'])
     rows=[r for r in lines(ROOT/'artifacts/astra_public/dev.jsonl') if r['id'] not in hold]
     # Use a single domain to avoid weighting five near-identical versions of each pattern.
     rows += [r for r in lines(ROOT/'experiment/synthetic1000/cases.jsonl') if r['tags'][0]=='bank' and '-' in r['tags'][1]]
+    rows.extend(additional)
     texts=[view(ContestRequest.model_validate(r)) for r in rows]
     categories=[r['risk_category'] for r in rows]
     danger=[r['expected_decision']=='block' for r in rows]
@@ -49,6 +50,6 @@ def main():
     ]),LinearSVC(class_weight='balanced',random_state=42))
     detector=clone(pipeline).fit(texts+extra,danger+extra_y)
     pipeline.fit(texts,categories)
-    joblib.dump(dict(model=pipeline,danger=detector,min_margin=0.,danger_threshold=0.),OUT/'categories.joblib',compress=3)
+    joblib.dump(dict(model=pipeline,danger=detector,min_margin=0.,danger_threshold=0.),destination,compress=3)
 
 if __name__=='__main__':main()
