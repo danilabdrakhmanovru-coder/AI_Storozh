@@ -36,22 +36,25 @@ def evaluate(job):
     return slug, summary(rows, predictions)
 
 
-def main(version, workers):
+def main(version, workers, split):
     manifest = json.loads((OUT / "manifest.json").read_bytes())
     output = OUT / version
     output.mkdir(exist_ok=True)
     with ProcessPoolExecutor(max_workers=workers) as pool:
         reports = {}
-        for slug, result in pool.map(evaluate, [(slug, entry, output) for slug, entry in manifest.items()]):
+        jobs = [(slug, entry, output) for slug, entry in manifest.items() if split == "all" or entry["split"] == split]
+        for slug, result in pool.map(evaluate, jobs):
             reports[slug] = result
             if manifest[slug]["split"] == "development":
                 print(slug, result["decision_correct"], result["matrix"], flush=True)
-    (output / "metrics.json").write_text(json.dumps(reports, indent=2), "utf8")
+    name = "metrics.json" if split == "all" else f"{split}-metrics.json"
+    (output / name).write_text(json.dumps(reports, indent=2), "utf8")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("version", choices=["v7", "v8"])
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--split", choices=["development", "holdout", "all"], default="all")
     args = parser.parse_args()
-    main(args.version, args.workers)
+    main(args.version, args.workers, args.split)

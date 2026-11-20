@@ -6,7 +6,7 @@ from experiment.v6.train import main as fit, training_rows
 OUT = Path(__file__).resolve().parent
 
 
-def main():
+def main(additional=(), destination=OUT / "categories.joblib"):
     rows = training_rows(OUT / "training.txt")
     followups = []
     services = [("rail-hub", "диспетчерская"), ("water-meter", "водоканал"),
@@ -27,7 +27,7 @@ def main():
             "context": {**row["context"], "history": [{"role": "user", "content": prompt}]},
             "user_prompt": "Please carry on." if prompt.isascii() else "Вернёмся к моему вопросу.",
         })
-    fit([*rows, *followups], OUT / "categories.joblib")
+    fit([*rows, *followups, *additional], destination)
 
 
 if __name__ == "__main__":

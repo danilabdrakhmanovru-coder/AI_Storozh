@@ -1,0 +1,186 @@
+{
+  "public": {
+    "n": 133,
+    "decision_correct": 126,
+    "category_correct": 117,
+    "level_correct": 117,
+    "all_correct": 116,
+    "errors": 0,
+    "severe_total": 38,
+    "severe_block": 34,
+    "matrix": {
+      "allow": {
+        "allow": 67,
+        "block": 3
+      },
+      "confirm": {
+        "confirm": 13
+      },
+      "block": {
+        "block": 46,
+        "allow": 4
+      }
+    },
+    "missed_categories": {
+      "jailbreak": 3,
+      "harmful_content": 1
+    }
+  },
+  "v5": {
+    "n": 144,
+    "decision_correct": 144,
+    "category_correct": 144,
+    "level_correct": 144,
+    "all_correct": 144,
+    "errors": 0,
+    "severe_total": 54,
+    "severe_block": 54,
+    "matrix": {
+      "allow": {
+        "allow": 63
+      },
+      "confirm": {
+        "confirm": 21
+      },
+      "block": {
+        "block": 60
+      }
+    },
+    "missed_categories": {}
+  },
+  "v6": {
+    "n": 34,
+    "decision_correct": 34,
+    "category_correct": 34,
+    "level_correct": 34,
+    "all_correct": 34,
+    "errors": 0,
+    "severe_total": 9,
+    "severe_block": 9,
+    "matrix": {
+      "allow": {
+        "allow": 22
+      },
+      "confirm": {
+        "confirm": 1
+      },
+      "block": {
+        "block": 11
+      }
+    },
+    "missed_categories": {}
+  },
+  "publishing": {
+    "n": 1000,
+    "decision_correct": 981,
+    "category_correct": 969,
+    "level_correct": 973,
+    "all_correct": 969,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 392,
+    "matrix": {
+      "allow": {
+        "allow": 441,
+        "block": 19
+      },
+      "confirm": {
+        "confirm": 84
+      },
+      "block": {
+        "block": 456
+      }
+    },
+    "missed_categories": {}
+  },
+  "agriculture": {
+    "n": 1000,
+    "decision_correct": 985,
+    "category_correct": 971,
+    "level_correct": 977,
+    "all_correct": 971,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 392,
+    "matrix": {
+      "allow": {
+        "allow": 445,
+        "block": 15
+      },
+      "confirm": {
+        "confirm": 84
+      },
+      "block": {
+        "block": 456
+      }
+    },
+    "missed_categories": {}
+  },
+  "sports": {
+    "n": 1000,
+    "decision_correct": 983,
+    "category_correct": 973,
+    "level_correct": 975,
+    "all_correct": 973,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 392,
+    "matrix": {
+      "allow": {
+        "allow": 443,
+        "block": 17
+      },
+      "confirm": {
+        "confirm": 84
+      },
+      "block": {
+        "block": 456
+      }
+    },
+    "missed_categories": {}
+  },
+  "ferry": {
+    "n": 26,
+    "decision_correct": 26,
+    "category_correct": 26,
+    "level_correct": 26,
+    "all_correct": 26,
+    "errors": 0,
+    "severe_total": 9,
+    "severe_block": 9,
+    "matrix": {
+      "allow": {
+        "allow": 15
+      },
+      "confirm": {
+        "confirm": 1
+      },
+      "block": {
+        "block": 10
+      }
+    },
+    "missed_categories": {}
+  },
+  "radio": {
+    "n": 16,
+    "decision_correct": 16,
+    "category_correct": 16,
+    "level_correct": 16,
+    "all_correct": 16,
+    "errors": 0,
+    "severe_total": 5,
+    "severe_block": 5,
+    "matrix": {
+      "allow": {
+        "allow": 9
+      },
+      "confirm": {
+        "confirm": 1
+      },
+      "block": {
+        "block": 6
+      }
+    },
+    "missed_categories": {}
+  }
+}

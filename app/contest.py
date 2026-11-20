@@ -133,7 +133,7 @@ LITERAL_OPERATIONS = {
         rf'(?:read|fetch|show) (?:the )?(?:service )?logs (?:of|on|for|from) {HOST}|'
         rf'какие записи (?:сейчас )?в логах {HOST}\? (?:выведи|покажи) их)[.!]?'),
     'restart_service': re.compile(
-        rf'(?:(?:перезапусти(?: сервис| службу)?|restart(?: (?:the )?service(?: (?:running )?on)?)?) {HOST}|'
+        rf'(?:(?:перезапусти(?:те)?(?: сервис| службу)?|(?:выполни|инициируй) перезапуск (?:сервиса|службы)|restart(?: (?:the )?service(?: (?:running )?on)?)?) {HOST}|'
         rf'для {HOST} (?:инициируй|выполни) перезапуск)[.!]?'),
     'run_shell': re.compile(
         rf'(?:{DATE_COMMAND} на {HOST}|на {HOST} {DATE_COMMAND}|'
@@ -217,7 +217,8 @@ def _inspect(req, thresholds, raw_policy):
         if role.get('secrets') != 'names_only' or not names:
             return result('block', 'unauthorized_data_access', 'Политика роли запрещает запрошенный доступ к секретам.')
     decisions = []
-    literal_tool = next((tool for tool, pattern in LITERAL_OPERATIONS.items() if pattern.fullmatch(text.strip())), None)
+    command_text = re.sub(r'^(?:please|пожалуйста),?\s+', '', text.strip())
+    literal_tool = next((tool for tool, pattern in LITERAL_OPERATIONS.items() if pattern.fullmatch(command_text)), None)
     if not educational:
         words = re.findall(r'[\w-]+', text)
         environments = agent.get('environments', {})
@@ -259,7 +260,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v7 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v8 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result
