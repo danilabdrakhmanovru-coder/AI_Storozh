@@ -14,7 +14,7 @@ LEXICON = {
     'transfer': r'перешли|отправ|вышли|переправ|переда|выгруз|send|upload|forward|export|post to',
     'private': r'чуж|без (?:его |их )?(?:доступа|согласия|разрешения)|другого (?:пациента|клиента|пользователя)|персональн|without (?:their )?(?:permission|consent)|another user|private (?:record|file)|someone else',
     'hidden': r'системн.{0,18}(?:пром|инструкц|сообщен)|скрыт.{0,18}(?:инструкц|указан|настройк)|закрыт.{0,15}инструкц|непубличн|внутренн.{0,12}указан|system (?:message|prompt|instruction)|hidden instruction|startup instruction',
-    'extract': r'дослов|процитир|воспроизвед|распечатай|точный текст|оригинал|выведи|скопируй|verbatim|word for word|quote|print|reveal',
+    'extract': r'дослов|процитир|воспроизвед|распечатай|точный текст|оригинал|выведи|скопируй|verbatim|word for word|quote|(?<![\w-])print(?![\w-])|reveal',
     'override': r'замени|перепиши|постоянн.{0,12}правил|нов.{0,12}(?:системн|политик)|поменяй.{0,15}правил|с этого момента|update.{0,15}policy|replace|permanent|override',
     'ignore': r'игнорир|отмени.{0,20}(?:указан|инструкц|огранич)|отбрось|не учитывай|disregard|ignore|discard.{0,15}rule',
     'pretend': r'гипотетич|ролев|персонаж|сыграй|притвор|без (?:цензуры|фильтров|ограничений)|роли.{0,12}помощник|hypothetic|unrestricted|role.play|pretend|developer mode|jailbreak',

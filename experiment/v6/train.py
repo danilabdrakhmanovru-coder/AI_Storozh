@@ -3,9 +3,9 @@ from experiment.v5.train import OUT as V5
 from experiment.v4.train import lines,main as fit
 from experiment.v6.evaluate import OUT
 
-def main():
-    rows=[r for r in lines(V5/'museum.jsonl') if r['tags'][1]=='development'][:24]
-    for line in (OUT/'training.txt').read_text('utf-8-sig').splitlines():
+def training_rows(path):
+    rows=[]
+    for line in path.read_text('utf-8-sig').splitlines():
         key,*examples=line.split('|')
         cat,_,source=key.partition('@')
         for text in examples:
@@ -17,6 +17,11 @@ def main():
                 ctx['attachments']=[dict(content=text)]
                 text='Summarize the following material.'
             rows.append(dict(context=ctx,user_prompt=text,risk_category=cat,expected_decision='allow' if cat=='none' else 'block'))
-    fit(rows,OUT/'categories.joblib')
+    return rows
+
+
+def main(additional=(), destination=OUT/'categories.joblib'):
+    rows=[r for r in lines(V5/'museum.jsonl') if r['tags'][1]=='development'][:24]
+    fit([*rows, *training_rows(OUT/'training.txt'), *additional], destination)
 
 if __name__=='__main__':main()

@@ -1,0 +1,98 @@
+{
+  "ferry": {
+    "n": 26,
+    "decision_correct": 24,
+    "category_correct": 22,
+    "level_correct": 21,
+    "all_correct": 20,
+    "errors": 0,
+    "severe_total": 9,
+    "severe_block": 9,
+    "matrix": {
+      "allow": {
+        "block": 2,
+        "allow": 13
+      },
+      "confirm": {
+        "confirm": 1
+      },
+      "block": {
+        "block": 10
+      }
+    },
+    "missed_categories": {}
+  },
+  "public": {
+    "n": 133,
+    "decision_correct": 126,
+    "category_correct": 117,
+    "level_correct": 117,
+    "all_correct": 116,
+    "errors": 0,
+    "severe_total": 38,
+    "severe_block": 34,
+    "matrix": {
+      "allow": {
+        "allow": 67,
+        "block": 3
+      },
+      "confirm": {
+        "confirm": 13
+      },
+      "block": {
+        "block": 46,
+        "allow": 4
+      }
+    },
+    "missed_categories": {
+      "jailbreak": 3,
+      "harmful_content": 1
+    }
+  },
+  "v5": {
+    "n": 144,
+    "decision_correct": 143,
+    "category_correct": 143,
+    "level_correct": 143,
+    "all_correct": 143,
+    "errors": 0,
+    "severe_total": 54,
+    "severe_block": 54,
+    "matrix": {
+      "allow": {
+        "allow": 62,
+        "block": 1
+      },
+      "confirm": {
+        "confirm": 21
+      },
+      "block": {
+        "block": 60
+      }
+    },
+    "missed_categories": {}
+  },
+  "v6": {
+    "n": 34,
+    "decision_correct": 33,
+    "category_correct": 33,
+    "level_correct": 33,
+    "all_correct": 33,
+    "errors": 0,
+    "severe_total": 9,
+    "severe_block": 9,
+    "matrix": {
+      "allow": {
+        "allow": 21,
+        "block": 1
+      },
+      "confirm": {
+        "confirm": 1
+      },
+      "block": {
+        "block": 11
+      }
+    },
+    "missed_categories": {}
+  }
+}

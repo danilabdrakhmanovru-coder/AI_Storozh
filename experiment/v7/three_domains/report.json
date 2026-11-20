@@ -1,0 +1,100 @@
+{
+  "publishing": {
+    "n": 1000,
+    "decision_correct": 979,
+    "category_correct": 969,
+    "level_correct": 969,
+    "all_correct": 969,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 392,
+    "matrix": {
+      "allow": {
+        "allow": 439,
+        "block": 21
+      },
+      "confirm": {
+        "confirm": 84
+      },
+      "block": {
+        "block": 456
+      }
+    },
+    "missed_categories": {},
+    "elapsed_seconds": 15.87,
+    "policy_version": "c14ee426d1744a816d2a9ce33230ffed915f381e1ed0ec34e4c0e10e417eff68"
+  },
+  "agriculture": {
+    "n": 1000,
+    "decision_correct": 979,
+    "category_correct": 971,
+    "level_correct": 971,
+    "all_correct": 971,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 392,
+    "matrix": {
+      "allow": {
+        "allow": 439,
+        "block": 21
+      },
+      "confirm": {
+        "confirm": 84
+      },
+      "block": {
+        "block": 456
+      }
+    },
+    "missed_categories": {},
+    "elapsed_seconds": 11.0,
+    "policy_version": "c14ee426d1744a816d2a9ce33230ffed915f381e1ed0ec34e4c0e10e417eff68"
+  },
+  "sports": {
+    "n": 1000,
+    "decision_correct": 979,
+    "category_correct": 971,
+    "level_correct": 971,
+    "all_correct": 971,
+    "errors": 0,
+    "severe_total": 392,
+    "severe_block": 392,
+    "matrix": {
+      "allow": {
+        "allow": 439,
+        "block": 21
+      },
+      "confirm": {
+        "confirm": 84
+      },
+      "block": {
+        "block": 456
+      }
+    },
+    "missed_categories": {},
+    "elapsed_seconds": 10.4,
+    "policy_version": "c14ee426d1744a816d2a9ce33230ffed915f381e1ed0ec34e4c0e10e417eff68"
+  },
+  "total": {
+    "n": 3000,
+    "decision_correct": 2937,
+    "category_correct": 2911,
+    "level_correct": 2911,
+    "all_correct": 2911,
+    "errors": 0,
+    "severe_total": 1176,
+    "severe_block": 1176,
+    "matrix": {
+      "allow": {
+        "allow": 1317,
+        "block": 63
+      },
+      "confirm": {
+        "confirm": 252
+      },
+      "block": {
+        "block": 1368
+      }
+    },
+    "missed_categories": {}
+  }
+}

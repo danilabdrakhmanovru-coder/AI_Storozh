@@ -50,7 +50,8 @@ def parse_policy(raw):
 TOOLS = {
     'restart_service': r'\b(?:перезапусти(?:те)?|рестартни|restart|restart_service|(?:инициируй|выполни|сделай) перезапуск)\b',
     'delete_resource': r'\b(?:удали(?:те)?|delete|remove|delete_resource|(?:запрашиваю|выполни|инициируй) удаление)\b',
-    'read_logs': r'(?:покажи|прочитай|выведи|открой|посмотри|read|show|fetch).{0,40}(?:лог|журнал|logs)|\bread_logs\b',
+    'read_logs': r'(?:покажи|прочитай|выведи|открой|посмотри|read|show|fetch).{0,40}(?:лог|журнал|logs)|'
+                 r'\bкакие записи (?:сейчас )?в (?:логах|журнале)\b|\bread_logs\b',
     'run_shell': r'(?:выполни|запусти|run|execute).{0,35}(?:команд|скрипт|shell|command|script|миграци|migration)|\b(?:run|выполни)\s+`?(?:df|du|ps|uptime|date)\b|\brun_shell\b|\b(?:масштабируй|deploy|scale|roll ?back|очисти кэш|поставь log_level)\b',
 }
 FORBIDDEN = {
@@ -68,7 +69,13 @@ DIRECTIVE = re.compile(r'\b(?:перезапусти|выполни|отправ
 EDUCATIONAL = re.compile(r'^(?:объясни|расскажи|что (?:такое|делает)|как работает|explain|what (?:is|does)|how does)\b', re.I)
 REQUEST_ACTION = re.compile(
     r'\b(?:покажи|перешли|пришли|выгрузи|дай|открой|предоставь|передай|'
-    r'составь|подготовь|придумай|создай|напиши|сгенерируй|сделай|show|send|export|write|create|draft|design)\b')
+    r'составь|подготовь|придумай|создай|напиши|сгенерируй|сделай|show|send|export|write|create|draft|compose|prepare|design)\b')
+FRAUDULENT_DOCUMENT = re.compile(
+    r'^\s+(?:(?:a|an|the)\s+)?(?:fraudulent|counterfeit|forged|fake|bogus|deceptive)\s+'
+    r'(?:(?:billing|payment|renewal|ticket|fare|delivery)\s+)?(?:invoice|notice|request|reminder|demand|letter|message)\b')
+PAYMENT_INTENT = re.compile(
+    r'\b(?:to (?:trick|deceive|divert)|(?:pays?|paying|send|wire|transfer|divert)\b.{0,45}'
+    r'\b(?:impost[oe]r|scammer|fraudster|me|my account))\b')
 FRAUD = re.compile(
     r'\b(?:фишингов\w*\s+(?:письм|сообщени|страниц)|(?:выманить|вымани|обманом получить)'
     r'.{0,65}(?:парол|код|токен|деньги)|phishing\s+(?:email|message|page))')
@@ -89,8 +96,9 @@ def requested_violation(text):
         if re.match(r'\s*[, ]*(?:памятку|предупреждение|отказ|вымышленный пример|учебный разбор|'
                     r'как (?:распознать|обнаружить|предотвратить)|how to (?:detect|report|prevent))\b', clause):
             continue
-        if FRAUD.search(clause) or (CREDENTIAL.search(clause) and DECEPTION.search(clause)
-                                    and SOLICIT.search(clause)):
+        payment_fraud = FRAUDULENT_DOCUMENT.match(clause) and PAYMENT_INTENT.search(clause)
+        credential_fraud = CREDENTIAL.search(clause) and DECEPTION.search(clause) and SOLICIT.search(clause)
+        if payment_fraud or credential_fraud or FRAUD.search(clause):
             return 'fraud_social_engineering'
         if PRIVATE.search(clause) and RECORD.search(clause):
             return 'unauthorized_data_access'
@@ -115,20 +123,44 @@ def read_policy():
     return path.read_bytes()
 
 
-SINGLE_OPERATION = re.compile(
-    r'(?:(?:открой|прочитай|посмотри|покажи|выведи) (?:журнал|логи)(?: (?:приложения|сервиса))?|'
-    r'(?:read|show) (?:the )?(?:service )?logs (?:of|on)|'
-    r'(?:выполни|запусти) (?:shell-)?команду (?:проверки времени|для просмотра текущей даты) на|'
-    r'run (?:a |the )?shell command to display the (?:current )?date on|'
-    r'(?:перезапусти|restart)(?: сервис| службу| service)?|(?:удали|delete) (?:ресурс|resource)) '
-    r'(?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*[.!]?')
+# Only a complete request for one operation on one named host can use its
+# policy decision directly. Other text, history and documents still go through ML.
+HOST = r'(?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*'
+DATE_COMMAND = r'(?:выполни|запусти) (?:shell-)?команду (?:проверки времени|для просмотра текущей даты)'
+LITERAL_OPERATIONS = {
+    'read_logs': re.compile(
+        rf'(?:(?:открой|прочитай|посмотри|покажи|выведи) (?:журнал|логи)(?: (?:приложения|сервиса))? {HOST}|'
+        rf'(?:read|fetch|show) (?:the )?(?:service )?logs (?:of|on|for|from) {HOST}|'
+        rf'какие записи (?:сейчас )?в логах {HOST}\? (?:выведи|покажи) их)[.!]?'),
+    'restart_service': re.compile(
+        rf'(?:(?:перезапусти(?: сервис| службу)?|restart(?: (?:the )?service(?: (?:running )?on)?)?) {HOST}|'
+        rf'для {HOST} (?:инициируй|выполни) перезапуск)[.!]?'),
+    'run_shell': re.compile(
+        rf'(?:{DATE_COMMAND} на {HOST}|на {HOST} {DATE_COMMAND}|'
+        rf'run (?:a |the )?shell command to display the (?:current )?date on {HOST})[.!]?'),
+    'delete_resource': re.compile(
+        rf'(?:удали ресурс|запрашиваю удаление ресурса|(?:delete|remove) (?:the )?resource) {HOST}[.!]?'),
+}
 
 
 def inspect_request(req, thresholds, raw_policy):
+    # An explicit continuation inherits the previous user action, including
+    # its role checks. Keep older turns and current attachments for inspection.
+    history = req.context.history
+    if history and history[-1].role == 'user' and CONTINUATION.fullmatch(req.user_prompt.strip()):
+        req = req.model_copy(update={'user_prompt': history[-1].content,
+            'context': req.context.model_copy(update={'history': history[:-1]})})
     verdict = _inspect(req, thresholds, raw_policy)
     policy_level = verdict.pop('_operation_level', None)
     verdict['risk_level'] = policy_level or risk_level(req, verdict['risk_category'])
     return verdict
+
+
+CONTINUATION = re.compile(
+    r'(?:продолж(?:и|ай)(?: по моей предыдущей просьбе)?|'
+    r'выполни (?:мою )?(?:просьбу|запрос) из предыдущего сообщения|'
+    r'(?:please )?(?:continue|go ahead|carry on)(?: with (?:my|the) (?:previous|last) request)?)'
+    r'[.!]?', re.I)
 
 
 def _inspect(req, thresholds, raw_policy):
@@ -185,6 +217,7 @@ def _inspect(req, thresholds, raw_policy):
         if role.get('secrets') != 'names_only' or not names:
             return result('block', 'unauthorized_data_access', 'Политика роли запрещает запрошенный доступ к секретам.')
     decisions = []
+    literal_tool = next((tool for tool, pattern in LITERAL_OPERATIONS.items() if pattern.fullmatch(text.strip())), None)
     if not educational:
         words = re.findall(r'[\w-]+', text)
         environments = agent.get('environments', {})
@@ -195,12 +228,12 @@ def _inspect(req, thresholds, raw_policy):
         if 'nonprod' in environments and {'dev', 'stage', 'test', 'staging', 'development'} & set(words):
             matched.append('nonprod')
         for tool, pattern in TOOLS.items():
-            if re.search(pattern, text):
+            if tool == literal_tool or re.search(pattern, text):
                 rule = role.get('tools', {}).get(tool, 'deny') if tool in agent.get('tools', []) else 'deny'
                 for env in matched or list(environments) or ['unknown']:
                     decision = access(rule, env)
                     decisions.append((decision, tool, env, f'{ctx.user_role}, {tool}, {env}: {decision}.'))
-    literal_operation = bool(decisions and not ctx.history and not ctx.attachments and SINGLE_OPERATION.fullmatch(text))
+    literal_operation = bool(decisions and literal_tool and not ctx.history and not ctx.attachments)
     if decisions:
         decision, tool, env, reason = max(decisions, key=lambda item: (
             ['allow', 'confirm', 'block'].index(item[0]), item[1]=='delete_resource', item[2]=='prod'))
@@ -226,7 +259,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v6 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v7 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result
