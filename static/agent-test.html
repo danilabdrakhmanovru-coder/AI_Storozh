@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Проверка агента · ИИ-сторож</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>main{max-width:760px;margin:auto;padding:clamp(16px,4vw,40px)}h1{margin-bottom:8px}pre{white-space:pre-wrap;overflow-wrap:anywhere}details{margin:16px 0}</style>
+</head>
+<body>
+<main>
+  <h1>Проверка агента</h1>
+  <p>Отправьте инструкцию в <code>POST /v1/check</code>, чтобы увидеть решение защитного слоя.</p>
+  <form class="panel" id="form">
+    <label for="prompt">Инструкция</label>
+    <textarea id="prompt" rows="3" maxlength="32000" required>Перезапусти сервис prod-api</textarea>
+    <label for="role">Роль пользователя</label>
+    <select id="role"><option>developer</option><option>sre</option><option>admin</option></select>
+    <details><summary>Контекст и доступ</summary>
+      <label for="agent">Целевой агент</label><input id="agent" value="it_ops_agent" required>
+      <label for="history">История сообщений · JSON</label><textarea id="history" rows="2">[]</textarea>
+      <label for="attachments">Вложения · JSON</label><textarea id="attachments" rows="2">[]</textarea>
+      <label for="key">Ключ API, если требуется</label><input id="key" type="password" autocomplete="off">
+    </details>
+    <button class="primary" id="submit">Проверить</button>
+  </form>
+  <section class="panel" aria-live="polite"><h2>Ответ агента</h2><pre id="output">Здесь появится результат проверки.</pre></section>
+</main>
+<script>
+const field = id => document.getElementById(id);
+function readList(id, label) {
+  try {
+    const value = JSON.parse(field(id).value);
+    if (Array.isArray(value)) return value;
+  } catch {}
+  throw new Error('Поле «' + label + '» должно содержать JSON-массив.');
+}
+field('form').addEventListener('submit', async event => {
+  event.preventDefault();
+  field('submit').disabled = true;
+  field('output').textContent = 'Идёт проверка…';
+  try {
+    const context = {
+      target_agent: field('agent').value.trim(),
+      user_role: field('role').value,
+      history: readList('history', 'История сообщений'),
+      attachments: readList('attachments', 'Вложения')
+    };
+    const headers = {'Content-Type': 'application/json'};
+    if (field('key').value) headers['X-API-Key'] = field('key').value;
+    const response = await fetch('/v1/check', {
+      method: 'POST', headers, body: JSON.stringify({user_prompt: field('prompt').value, context})
+    });
+    const data = await response.json();
+    field('output').textContent = (response.ok ? '' : 'Ошибка HTTP ' + response.status + '\n') + JSON.stringify(data, null, 2);
+  } catch (error) {
+    field('output').textContent = error.message;
+  } finally {
+    field('submit').disabled = false;
+  }
+});
+</script>
+</body>
+</html>
