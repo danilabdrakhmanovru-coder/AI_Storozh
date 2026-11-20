@@ -169,10 +169,10 @@ def inspect_request(req, thresholds, raw_policy):
                     decision = access(rule, env)
                     decisions.append((decision, f'{ctx.user_role}, {tool}, {env}: {decision}.'))
     try:
-        category = predict(req)
+        category = predict(req, check_danger=not decisions)
     except Exception:
         return result('block', 'tool_abuse', 'Модель категорий недоступна. Передача остановлена.')
-    if category in policy['always_block']:
+    if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
         return result('block', category, f'Модель v3 определила категорию {category}. Политика запрещает такие запросы.')
     score = classify(req.user_prompt)
     if score['status'] != 'ok':

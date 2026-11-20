@@ -21,11 +21,15 @@ def load():
     return joblib.load(MODEL)
 
 
-def predict(req):
+def predict(req, *, check_danger=False):
     artifact = load()
     model = artifact['model']
-    scores = model.decision_function([packet_text(req)])[0]
+    text = [packet_text(req)]
+    scores = model.decision_function(text)[0]
     order = np.argsort(scores)
+    if check_danger and artifact['danger'].decision_function(text)[0] >= artifact['danger_threshold']:
+        return next(model.classes_[i] for i in reversed(order)
+                    if model.classes_[i] not in {'none', 'sensitive_action'})
     if scores[order[-1]] - scores[order[-2]] < artifact['min_margin']:
         return None
     return model.classes_[order[-1]]

@@ -41,7 +41,28 @@ def main(path):
     ]), LinearSVC(class_weight='balanced', random_state=42))
     blocked = yaml.safe_load((MODEL.parents[2]/'security_policy.yaml').read_bytes())['always_block']
     benign_margins = []
+    severe_scores = []
+    binary = np.array([r['expected_decision'] == 'block' for r in rows])
+    extra = []
+    for source in ('train.txt', 'v2/additional.txt'):
+        extra.extend(line.split('|', 1) for line in (MODEL.parents[1]/source).read_text('utf-8-sig').splitlines() if '|' in line)
+
+    extra.extend(('safe', s) for s in (
+        'Объясни, как работают операции в production.',
+        'Как устроен перезапуск службы при обновлении?',
+        'Что происходит с приложением при рестарте сервиса?',
+        'Describe how service restarts work in production.',
+        'Как устроены права на чтение журналов?',
+    ))
+
+    def fit_detector(indices):
+        return clone(model).fit([texts[i] for i in indices] + [t for _, t in extra],
+                                binary[indices].tolist() + [label == 'threat' for label, _ in extra])
+
     for fit, val in StratifiedGroupKFold(3, shuffle=True, random_state=17).split(train, labels[train], families[train]):
+        detector = fit_detector(train[fit])
+        severe = [i for i in train[val] if binary[i] and rows[i]['risk_level'] in {'high', 'critical'}]
+        severe_scores.extend(detector.decision_function([texts[i] for i in severe]))
         fold = clone(model).fit([texts[i] for i in train[fit]], labels[train[fit]])
         for idx, scores in zip(train[val], fold.decision_function([texts[i] for i in train[val]])):
             if labels[idx] != 'none':
@@ -51,7 +72,10 @@ def main(path):
             benign_margins.append(margin if fold.classes_[order[-1]] in blocked else 0.)
     cutoff = float(np.quantile(benign_margins, .97, method='higher')) + 1e-8
     model.fit([texts[i] for i in train], labels[train])
-    joblib.dump({'model':model, 'min_margin':cutoff}, MODEL, compress=3)
+    # Aim for 90% internal recall to allow for sampling uncertainty on new data.
+    danger_threshold = float(np.quantile(severe_scores, .10, method='lower'))
+    joblib.dump({'model':model, 'min_margin':cutoff, 'danger':fit_detector(train),
+                 'danger_threshold': danger_threshold}, MODEL, compress=3)
     metadata = {'source_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                 'train_counts': dict(Counter(labels[train])), 'test_counts': dict(Counter(labels[test])),
                 'groups': len(set(families)), 'holdout_ids': [rows[i]['id'] for i in test]}
