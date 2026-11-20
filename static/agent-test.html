@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Проверка агента · ИИ-сторож</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <style>main{max-width:760px;margin:auto;padding:clamp(16px,4vw,40px)}h1{margin-bottom:8px}pre{white-space:pre-wrap;overflow-wrap:anywhere}details{margin:16px 0}</style>
+  <link rel="stylesheet" href="/static/agent-test.css">
 </head>
 <body>
+<header><div class="bar"><span class="brand"><span class="mark" aria-hidden="true">✓</span>ИИ-сторож</span><code>POST /v1/check</code></div></header>
 <main>
-  <h1>Проверка агента</h1>
-  <p>Отправьте инструкцию в <code>POST /v1/check</code>, чтобы увидеть решение защитного слоя.</p>
+  <h1>Проверка инструкции</h1>
+  <div class="grid">
   <form class="panel" id="form">
+    <h2>Запрос к агенту</h2>
     <label for="scenario">Пример для проверки</label>
     <select id="scenario"><option value="block">Перезапуск · разработчик</option><option value="confirm">Перезапуск · SRE</option><option value="allow">Вопрос о перезапуске · разработчик</option></select>
     <label for="prompt">Инструкция</label>
@@ -26,11 +27,15 @@
     </details>
     <button class="primary" id="submit">Проверить</button>
   </form>
-  <section class="panel" aria-live="polite"><h2>Решение сторожа</h2><pre id="output">Здесь появится результат проверки.</pre>
+  <section class="panel verdict" aria-live="polite"><h2>Решение сторожа</h2>
+    <div class="display" id="display"><small id="signal">Ожидание</small><strong id="headline">Запрос готов к проверке</strong></div>
+    <p id="summary">Выберите пример или введите свою инструкцию.</p>
     <button type="button" id="confirm" class="primary" hidden>Подтвердить этот запрос</button>
     <button type="button" id="deliver" class="primary" hidden>Передать демо-агенту</button>
-    <p id="receipt"></p></section>
-  <details class="panel"><summary>Журнал последних проверок</summary>
+    <p id="receipt"></p>
+    <details id="raw" hidden><summary>Ответ API · JSON</summary><pre id="output"></pre></details></section>
+  </div>
+  <details class="panel log"><summary>Журнал последних проверок</summary>
     <button type="button" class="secondary" id="refresh">Обновить</button><pre id="journal"></pre></details>
 </main>
 <script>
@@ -49,7 +54,11 @@ function reset() {
   checked = null;
   field('confirm').hidden = field('deliver').hidden = true;
   field('receipt').textContent = '';
-  field('output').textContent = 'Нужна проверка текущего запроса.';
+  field('raw').hidden = true;
+  field('display').dataset.state = '';
+  field('signal').textContent = 'Ожидание';
+  field('headline').textContent = 'Запрос готов к проверке';
+  field('summary').textContent = 'Нажмите «Проверить», чтобы получить решение.';
 }
 field('form').addEventListener('input', reset);
 field('scenario').onchange = () => {
@@ -83,6 +92,8 @@ field('form').onsubmit = async event => {
   reset();
   const current = revision;
   field('submit').disabled = true;
+  field('headline').textContent = 'Проверяем инструкцию…';
+  field('summary').textContent = '';
   try {
     const body = {user_prompt:field('prompt').value, context:{
       target_agent:field('agent').value.trim(), user_role:field('role').value,
@@ -91,12 +102,24 @@ field('form').onsubmit = async event => {
     const data = await api('/v1/check', body);
     if (revision !== current) return;
     checked = {id:data.request_id, body};
+    field('display').dataset.state = data.decision;
+    field('signal').textContent = data.decision + ' · ' + data.latency_ms + ' мс';
+    field('headline').textContent = {allow:'Передача разрешена',confirm:'Нужно подтверждение',block:'Запрос заблокирован'}[data.decision];
+    field('summary').textContent = data.explanation + ' Уровень риска: ' + ({none:'отсутствует',low:'низкий',medium:'средний',high:'высокий',critical:'критический'}[data.risk_level] || data.risk_level) + '.';
+    field('raw').hidden = false;
     field('output').textContent = JSON.stringify(data,null,2);
     field('receipt').textContent = 'Демо-агент ничего не получил.';
     field('confirm').hidden = data.state !== 'pending';
     field('deliver').hidden = data.state !== 'ready';
+    if (window.matchMedia('(max-width:740px)').matches) {
+      field('display').scrollIntoView({block:'center'});
+    }
     await journal();
-  } catch (err) { if (revision === current) field('output').textContent = err.message; }
+  } catch (err) { if (revision === current) {
+    field('headline').textContent = 'Проверка не завершена';
+    field('signal').textContent = 'Ошибка';
+    field('summary').textContent = err.message;
+  } }
   finally { field('submit').disabled = false; }
 };
 for (const action of ['confirm','deliver']) {
