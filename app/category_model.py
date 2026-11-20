@@ -6,6 +6,7 @@ import unicodedata
 import joblib
 import numpy as np
 from .intent_features import view
+from .jailbreak_model import detects as detects_jailbreak
 
 MODEL = Path(__file__).resolve().parents[1] / "experiment/v3/categories.joblib"
 
@@ -48,6 +49,9 @@ def predict(req, *, check_danger=False):
     if check_danger and artifact['danger'].decision_function(text)[0] >= artifact['danger_threshold']:
         return next(model.classes_[i] for i in reversed(order)
                     if model.classes_[i] not in {'none', 'sensitive_action'})
+    label = model.classes_[order[-1]]
     if scores[order[-1]] - scores[order[-2]] < artifact['min_margin']:
-        return None
-    return model.classes_[order[-1]]
+        label = None
+    if label in {None, 'none', 'sensitive_action'} and detects_jailbreak(req):
+        return 'jailbreak'
+    return label
