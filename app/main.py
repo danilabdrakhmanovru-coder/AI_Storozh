@@ -1,7 +1,6 @@
 """ИИ-сторож: API and local operator console. Run with uvicorn app.main:app."""
-import logging
 import yaml
-from .contest import ContestRequest, inspect_request
+from .contest import ContestRequest, inspect_request, read_policy, parse_policy
 import csv
 import hashlib
 import html
@@ -250,16 +249,83 @@ def selftest(who=Depends(operator)):
 @app.get('/ui',response_class=HTMLResponse)
 def ui():return (ROOT/'static/index.html').read_text(encoding='utf-8')
 
+def contest_policy():
+    try:
+        raw = read_policy()
+        thresholds = policy.data['thresholds'].copy()
+        digest = hashlib.sha256(raw + json.dumps(thresholds, sort_keys=True).encode()).hexdigest()
+        return raw, thresholds, digest
+    except (OSError, ValueError, KeyError, yaml.YAMLError):
+        raise HTTPException(503, 'Политика недоступна. Требуется повторная проверка.')
+
+
+def packet_fingerprint(req, who):
+    if not who['admin']:
+        req.context.user_role = who['role']
+        req.context.user_id = who['user_id']
+    packet = json.dumps(req.model_dump(), sort_keys=True, ensure_ascii=False).encode()
+    return hashlib.sha256(packet).hexdigest()
+
+
 @app.post('/v1/check')
 def contest_check(req: ContestRequest, who=Depends(identity)):
     start = time.perf_counter()
-    if not who['admin']:
-        req.context.user_role = who['role']
+    fingerprint = packet_fingerprint(req, who)
+    raw, thresholds, pv = contest_policy()
     try:
-        response = inspect_request(req, policy.data['thresholds'])
+        response = inspect_request(req, thresholds, raw)
     except (OSError, ValueError, TypeError, KeyError, AttributeError, yaml.YAMLError):
         raise HTTPException(503, 'Проверка политики недоступна. Передача остановлена.')
-    response['latency_ms'] = round((time.perf_counter() - start) * 1000, 3)
-    logging.getLogger('uvicorn.error').info('contest_check decision=%s category=%s latency_ms=%s',
-        response['decision'], response['risk_category'], response['latency_ms'])
-    return response
+    rid = uuid.uuid4().hex
+    state = {'allow': 'ready', 'confirm': 'pending', 'block': 'blocked'}[response['decision']]
+    latency = round((time.perf_counter() - start) * 1000, 3)
+    role = req.context.user_role
+    with store.lock, store.db:
+        store.db.execute('INSERT INTO contest_checks VALUES (?,?,?,?,?,?,?,?,?,?,NULL)',
+                         (rid, time.time(), who['user_id'], role if role in parse_roles(raw) else 'unknown',
+                          response['decision'], response['risk_category'], latency, pv, fingerprint, state))
+    return {**response, 'latency_ms': latency, 'request_id': rid, 'state': state, 'policy_version': pv}
+
+
+def parse_roles(raw):
+    return {role for agent in parse_policy(raw)['agents'].values() for role in agent['roles']}
+
+
+def transition(rid, req, who, confirm):
+    fingerprint = packet_fingerprint(req, who)
+    _, _, pv = contest_policy()
+    expected = ('pending',) if confirm else ('ready', 'approved')
+    state = 'approved' if confirm else 'delivered'
+    now = time.time()
+    # The local receiver records one receipt in the same transaction as delivery.
+    with store.lock, store.db:
+        changed = store.db.execute("""
+            UPDATE contest_checks SET state=?, received_at=?
+            WHERE id=? AND owner=? AND fingerprint=? AND policy_version=? AND ts>?
+              AND state IN (?,?)
+            """, (state, None if confirm else now, rid, who['user_id'], fingerprint, pv,
+                  now - 3600, expected[0], expected[-1]))
+        if changed.rowcount != 1:
+            raise HTTPException(409, 'Действие недоступно. Проверьте запрос и контекст заново.')
+    return {'request_id': rid, 'state': state, 'received_at': None if confirm else now}
+
+
+@app.post('/v1/demo/{rid}/confirm')
+def contest_confirm(rid: str, req: ContestRequest, who=Depends(identity)):
+    return transition(rid, req, who, confirm=True)
+
+
+@app.post('/v1/demo/{rid}/deliver')
+def contest_deliver(rid: str, req: ContestRequest, who=Depends(identity)):
+    return transition(rid, req, who, confirm=False)
+
+
+@app.get('/v1/demo/journal')
+def contest_journal(who=Depends(identity)):
+    with store.lock:
+        rows = store.db.execute("""
+            SELECT id, ts, role, decision, category, latency_ms, policy_version, state, received_at
+            FROM contest_checks WHERE owner=? ORDER BY ts DESC LIMIT 30
+            """, (who['user_id'],)).fetchall()
+    return [dict(row) for row in rows]
+

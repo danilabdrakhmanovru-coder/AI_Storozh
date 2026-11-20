@@ -12,8 +12,10 @@
   <h1>Проверка агента</h1>
   <p>Отправьте инструкцию в <code>POST /v1/check</code>, чтобы увидеть решение защитного слоя.</p>
   <form class="panel" id="form">
+    <label for="scenario">Пример для проверки</label>
+    <select id="scenario"><option value="block">Перезапуск · разработчик</option><option value="confirm">Перезапуск · SRE</option><option value="allow">Вопрос о перезапуске · разработчик</option></select>
     <label for="prompt">Инструкция</label>
-    <textarea id="prompt" rows="3" maxlength="32000" required>Перезапусти сервис prod-api</textarea>
+    <textarea id="prompt" rows="3" maxlength="32000" required>Перезапусти payments-api в production.</textarea>
     <label for="role">Роль пользователя</label>
     <select id="role"><option>developer</option><option>sre</option><option>admin</option></select>
     <details><summary>Контекст и доступ</summary>
@@ -24,7 +26,12 @@
     </details>
     <button class="primary" id="submit">Проверить</button>
   </form>
-  <section class="panel" aria-live="polite"><h2>Ответ агента</h2><pre id="output">Здесь появится результат проверки.</pre></section>
+  <section class="panel" aria-live="polite"><h2>Решение сторожа</h2><pre id="output">Здесь появится результат проверки.</pre>
+    <button type="button" id="confirm" class="primary" hidden>Подтвердить этот запрос</button>
+    <button type="button" id="deliver" class="primary" hidden>Передать демо-агенту</button>
+    <p id="receipt"></p></section>
+  <details class="panel"><summary>Журнал последних проверок</summary>
+    <button type="button" class="secondary" id="refresh">Обновить</button><pre id="journal"></pre></details>
 </main>
 <script>
 const field = id => document.getElementById(id);
@@ -35,30 +42,79 @@ function readList(id, label) {
   } catch {}
   throw new Error('Поле «' + label + '» должно содержать JSON-массив.');
 }
-field('form').addEventListener('submit', async event => {
-  event.preventDefault();
-  field('submit').disabled = true;
-  field('output').textContent = 'Идёт проверка…';
+let checked = null;
+let revision = 0;
+function reset() {
+  revision++;
+  checked = null;
+  field('confirm').hidden = field('deliver').hidden = true;
+  field('receipt').textContent = '';
+  field('output').textContent = 'Нужна проверка текущего запроса.';
+}
+field('form').addEventListener('input', reset);
+field('scenario').onchange = () => {
+  reset();
+  const example = field('scenario').value;
+  field('role').value = example === 'confirm' ? 'sre' : 'developer';
+  field('prompt').value = example === 'allow' ? 'Объясни, как работает перезапуск сервиса в production.' : 'Перезапусти payments-api в production.';
+  field('agent').value = 'it_ops_agent';
+  field('history').value = field('attachments').value = '[]';
+};
+async function api(path, body) {
+  const headers = {'Content-Type':'application/json'};
+  if (field('key').value) headers['X-API-Key'] = field('key').value;
+  const r = await fetch(path, body ? {method:'POST', headers, body:JSON.stringify(body)} : {headers});
+  const data = await r.json();
+  if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Ошибка HTTP ' + r.status);
+  return data;
+}
+async function journal() {
   try {
-    const context = {
-      target_agent: field('agent').value.trim(),
-      user_role: field('role').value,
-      history: readList('history', 'История сообщений'),
-      attachments: readList('attachments', 'Вложения')
-    };
-    const headers = {'Content-Type': 'application/json'};
-    if (field('key').value) headers['X-API-Key'] = field('key').value;
-    const response = await fetch('/v1/check', {
-      method: 'POST', headers, body: JSON.stringify({user_prompt: field('prompt').value, context})
-    });
-    const data = await response.json();
-    field('output').textContent = (response.ok ? '' : 'Ошибка HTTP ' + response.status + '\n') + JSON.stringify(data, null, 2);
-  } catch (error) {
-    field('output').textContent = error.message;
-  } finally {
-    field('submit').disabled = false;
-  }
-});
+    const rows = await api('/v1/demo/journal');
+    field('journal').textContent = rows.map(r =>
+      new Date(r.ts*1000).toLocaleString() + ' · ' + r.role + ' · ' + r.decision + ' · ' + r.category +
+      ' · ' + r.latency_ms + ' мс · ' + r.state + '\n' + r.id + ' · политика ' + r.policy_version.slice(0,12)
+    ).join('\n\n') || 'Проверок пока нет.';
+  } catch (err) { field('journal').textContent = err.message; }
+}
+field('refresh').onclick = journal;
+field('form').onsubmit = async event => {
+  event.preventDefault();
+  reset();
+  const current = revision;
+  field('submit').disabled = true;
+  try {
+    const body = {user_prompt:field('prompt').value, context:{
+      target_agent:field('agent').value.trim(), user_role:field('role').value,
+      history:readList('history','История сообщений'), attachments:readList('attachments','Вложения')
+    }};
+    const data = await api('/v1/check', body);
+    if (revision !== current) return;
+    checked = {id:data.request_id, body};
+    field('output').textContent = JSON.stringify(data,null,2);
+    field('receipt').textContent = 'Демо-агент ничего не получил.';
+    field('confirm').hidden = data.state !== 'pending';
+    field('deliver').hidden = data.state !== 'ready';
+    await journal();
+  } catch (err) { if (revision === current) field('output').textContent = err.message; }
+  finally { field('submit').disabled = false; }
+};
+for (const action of ['confirm','deliver']) {
+  field(action).onclick = async () => {
+    const packet = checked;
+    if (!packet) return;
+    field(action).hidden = true;
+    try {
+      const data = await api('/v1/demo/' + packet.id + '/' + action, packet.body);
+      if (checked !== packet) return;
+      field('deliver').hidden = data.state !== 'approved';
+      field('receipt').textContent = data.state === 'approved' ? 'Подтверждено. Запрос готов к передаче.' :
+        'Демо-агент получил запрос ' + data.request_id + ' в ' + new Date(data.received_at*1000).toLocaleTimeString() + '.';
+    } catch (err) { if (checked === packet) field('receipt').textContent = err.message; }
+    await journal();
+  };
+}
+journal();
 </script>
 </body>
 </html>

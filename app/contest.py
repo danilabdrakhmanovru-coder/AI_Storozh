@@ -12,16 +12,20 @@ from .classifier import classify
 from .guard import COMPILED, normalize
 
 
-class Message(BaseModel):
+class PacketPart(BaseModel):
+    model_config = {"extra": "allow"}
+
+
+class Message(PacketPart):
     role: str
     content: str = Field(max_length=32000)
 
 
-class Attachment(BaseModel):
+class Attachment(PacketPart):
     content: str = Field(max_length=32000)
 
 
-class Context(BaseModel):
+class Context(PacketPart):
     target_agent: str
     user_role: str
     history: list[Message] = Field(default_factory=list, max_length=64)
@@ -72,9 +76,13 @@ def access(rule, env):
     return 'confirm' if rule == 'confirm' else 'block'
 
 
-def inspect_request(req, thresholds):
+def read_policy():
     path = Path(os.getenv('ASTRA_POLICY_PATH', Path(__file__).resolve().parents[1] / 'security_policy.yaml'))
-    policy = parse_policy(path.read_bytes())
+    return path.read_bytes()
+
+
+def inspect_request(req, thresholds, raw_policy):
+    policy = parse_policy(raw_policy)
     ctx = req.context
     agent = policy['agents'].get(ctx.target_agent, {})
     role = agent.get('roles', {}).get(ctx.user_role, {})

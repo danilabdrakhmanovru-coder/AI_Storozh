@@ -12,6 +12,12 @@ class Store:
         self.db.row_factory = sqlite3.Row
         self.db.execute('PRAGMA journal_mode=WAL')
         self.db.executescript('''
+            CREATE TABLE IF NOT EXISTS contest_checks (
+                id TEXT PRIMARY KEY, ts REAL NOT NULL, owner TEXT NOT NULL, role TEXT NOT NULL,
+                decision TEXT NOT NULL, category TEXT NOT NULL, latency_ms REAL NOT NULL,
+                policy_version TEXT NOT NULL, fingerprint TEXT NOT NULL, state TEXT NOT NULL,
+                received_at REAL);
+            CREATE INDEX IF NOT EXISTS contest_owner_time ON contest_checks(owner, ts);
             CREATE TABLE IF NOT EXISTS requests (
               id TEXT PRIMARY KEY, ts REAL NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL,
               source TEXT NOT NULL, text TEXT NOT NULL, payload TEXT NOT NULL, result TEXT NOT NULL,
