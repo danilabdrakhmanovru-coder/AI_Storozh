@@ -1,0 +1,202 @@
+{
+  "abuse/block": {
+    "allow": 5,
+    "block": 15
+  },
+  "all/allow": {
+    "allow": 288,
+    "block": 217
+  },
+  "all/block": {
+    "allow": 20,
+    "block": 370
+  },
+  "all/confirm": {
+    "allow": 10,
+    "block": 35,
+    "confirm": 60
+  },
+  "attachment/allow": {
+    "block": 40
+  },
+  "attachment/block": {
+    "block": 40
+  },
+  "bank/allow": {
+    "allow": 58,
+    "block": 43
+  },
+  "bank/block": {
+    "allow": 4,
+    "block": 74
+  },
+  "bank/confirm": {
+    "allow": 2,
+    "block": 7,
+    "confirm": 12
+  },
+  "clinic/allow": {
+    "allow": 57,
+    "block": 44
+  },
+  "clinic/block": {
+    "allow": 4,
+    "block": 74
+  },
+  "clinic/confirm": {
+    "allow": 2,
+    "block": 7,
+    "confirm": 12
+  },
+  "critical/block": {
+    "allow": 5,
+    "block": 75
+  },
+  "data_exfiltration/block": {
+    "block": 40
+  },
+  "delete_resource/block": {
+    "allow": 5,
+    "block": 40
+  },
+  "delete_resource/confirm": {
+    "allow": 10,
+    "block": 5,
+    "confirm": 30
+  },
+  "education/allow": {
+    "allow": 60,
+    "block": 41
+  },
+  "education/block": {
+    "allow": 4,
+    "block": 74
+  },
+  "education/confirm": {
+    "allow": 2,
+    "block": 7,
+    "confirm": 12
+  },
+  "fraud_social_engineering/block": {
+    "allow": 5,
+    "block": 15
+  },
+  "harmful_content/block": {
+    "allow": 5,
+    "block": 15
+  },
+  "high/block": {
+    "allow": 10,
+    "block": 280
+  },
+  "history/allow": {
+    "allow": 14,
+    "block": 26
+  },
+  "history/block": {
+    "block": 60
+  },
+  "indirect_injection/block": {
+    "block": 40
+  },
+  "jailbreak/block": {
+    "block": 20
+  },
+  "logistics/allow": {
+    "allow": 54,
+    "block": 47
+  },
+  "logistics/block": {
+    "allow": 4,
+    "block": 74
+  },
+  "logistics/confirm": {
+    "allow": 2,
+    "block": 7,
+    "confirm": 12
+  },
+  "low/confirm": {
+    "allow": 10,
+    "block": 35,
+    "confirm": 60
+  },
+  "medium/block": {
+    "allow": 5,
+    "block": 15
+  },
+  "none/allow": {
+    "allow": 576,
+    "block": 434
+  },
+  "privilege_escalation/block": {
+    "block": 20
+  },
+  "prompt/allow": {
+    "allow": 109,
+    "block": 151
+  },
+  "prompt/block": {
+    "allow": 15,
+    "block": 185
+  },
+  "prompt_injection/block": {
+    "block": 20
+  },
+  "read_logs/allow": {
+    "allow": 75
+  },
+  "read_logs/block": {
+    "block": 15
+  },
+  "restart_service/allow": {
+    "allow": 45
+  },
+  "restart_service/block": {
+    "block": 15
+  },
+  "restart_service/confirm": {
+    "block": 10,
+    "confirm": 20
+  },
+  "run_shell/allow": {
+    "allow": 45
+  },
+  "run_shell/block": {
+    "block": 15
+  },
+  "run_shell/confirm": {
+    "block": 20,
+    "confirm": 10
+  },
+  "sensitive_action/confirm": {
+    "allow": 10,
+    "block": 35,
+    "confirm": 60
+  },
+  "support/allow": {
+    "allow": 59,
+    "block": 42
+  },
+  "support/block": {
+    "allow": 4,
+    "block": 74
+  },
+  "support/confirm": {
+    "allow": 2,
+    "block": 7,
+    "confirm": 12
+  },
+  "system_prompt_extraction/block": {
+    "block": 40
+  },
+  "system_prompt_override/block": {
+    "block": 20
+  },
+  "tool_abuse/block": {
+    "allow": 5,
+    "block": 85
+  },
+  "unauthorized_data_access/block": {
+    "block": 40
+  }
+}

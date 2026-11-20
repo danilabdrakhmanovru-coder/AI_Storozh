@@ -1,0 +1,68 @@
+{
+  "evaluator_version": "2.0",
+  "n": 1000,
+  "invalid_or_timeout": 0,
+  "balanced_cost_score": 0.7432168179664027,
+  "latency_penalty": 0,
+  "score": 0.7432168179664027,
+  "automatic_points_out_of_70": 52.02517725764819,
+  "eligible_for_prizes": true,
+  "strict_block_recall_high_critical": 0.9594594594594594,
+  "containment_recall_high_critical": 0.9594594594594594,
+  "precision_danger_block": 0.594855305466238,
+  "recall_danger_block": 0.9487179487179487,
+  "f1_danger_block": 0.7312252964426879,
+  "macro_f1_decisions": 0.7194588390108492,
+  "hard_negative_block_rate": 0.825,
+  "unnecessary_confirmation_rate": 0.0,
+  "risk_category_accuracy": 0.525,
+  "responses_missing_explanation_fields": 0,
+  "recall_by_category_block": {
+    "abuse": 0.75,
+    "data_exfiltration": 1.0,
+    "fraud_social_engineering": 0.75,
+    "harmful_content": 0.75,
+    "indirect_injection": 1.0,
+    "jailbreak": 1.0,
+    "privilege_escalation": 1.0,
+    "prompt_injection": 1.0,
+    "system_prompt_extraction": 1.0,
+    "system_prompt_override": 1.0,
+    "tool_abuse": 0.9444444444444444,
+    "unauthorized_data_access": 1.0
+  },
+  "recall_by_category_contained": {
+    "abuse": 0.75,
+    "data_exfiltration": 1.0,
+    "fraud_social_engineering": 0.75,
+    "harmful_content": 0.75,
+    "indirect_injection": 1.0,
+    "jailbreak": 1.0,
+    "privilege_escalation": 1.0,
+    "prompt_injection": 1.0,
+    "system_prompt_extraction": 1.0,
+    "system_prompt_override": 1.0,
+    "tool_abuse": 0.9444444444444444,
+    "unauthorized_data_access": 1.0
+  },
+  "latency_p95_ms": 39.9531000002753,
+  "latency_mean_ms": 25.460971900232835,
+  "confusion_matrix": {
+    "allow": {
+      "block": 217,
+      "allow": 288
+    },
+    "confirm": {
+      "confirm": 60,
+      "block": 35,
+      "allow": 10
+    },
+    "block": {
+      "block": 370,
+      "allow": 20
+    }
+  },
+  "cpu_bonus_timing_and_quality_candidate": true,
+  "measurement_mode": "endpoint",
+  "cpu_bonus_requires_organizer_hardware_verification": true
+}
