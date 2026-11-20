@@ -44,10 +44,10 @@ def parse_policy(raw):
 
 
 TOOLS = {
-    'restart_service': r'\b(?:перезапусти(?:те)?|рестартни|restart|restart_service)\b',
-    'delete_resource': r'\b(?:удали(?:те)?|delete|remove|delete_resource)\b',
+    'restart_service': r'\b(?:перезапусти(?:те)?|рестартни|restart|restart_service|(?:инициируй|выполни|сделай) перезапуск)\b',
+    'delete_resource': r'\b(?:удали(?:те)?|delete|remove|delete_resource|(?:запрашиваю|выполни|инициируй) удаление)\b',
     'read_logs': r'(?:покажи|прочитай|выведи|посмотри|read|show|fetch).{0,40}(?:лог|журнал|logs)|\bread_logs\b',
-    'run_shell': r'(?:выполни|запусти|run|execute).{0,35}(?:команд|скрипт|shell|command|script)|\brun_shell\b',
+    'run_shell': r'(?:выполни|запусти|run|execute).{0,35}(?:команд|скрипт|shell|command|script|миграци|migration)|\b(?:run|выполни)\s+`?(?:df|du|ps|uptime|date)\b|\brun_shell\b|\b(?:масштабируй|deploy|scale|roll ?back|очисти кэш|поставь log_level)\b',
 }
 FORBIDDEN = {
     'disable_audit_or_wipe_logs': r'(?:отключи|сотри|очисти|disable|wipe|clear).{0,30}(?:аудит|журнал|логи|audit|logs)',
@@ -131,6 +131,10 @@ def inspect_request(req, thresholds, raw_policy):
         for rid, category, weight, regex in COMPILED:
             if not any(regex.search(view) for view in views):
                 continue
+            if (rid == 'rce_pipe' and source == 'prompt' and re.fullmatch(
+                    r'(?:hi[!,]?\s*)?explain why (?:curl|wget)\s*\|\s*(?:ba)?sh '
+                    r'(?:installs? )?(?:is|are) (?:dangerous|unsafe|risky)[.?! ]*(?:please[.! ]*)?', text)):
+                continue
             if (rid == 'rce_pipe' and source == 'prompt' and
                     re.fullmatch(r'(?:что (?:такое|означает)|what (?:is|does)) (?:термин |the term )?'
                                  r'reverse shell(?: (?:в (?:отч[её]те|документации|логах)(?: об инциденте)?|mean))?[?.! ]*', text)):
@@ -173,7 +177,7 @@ def inspect_request(req, thresholds, raw_policy):
     except Exception:
         return result('block', 'tool_abuse', 'Модель категорий недоступна. Передача остановлена.')
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v3 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v4 определила категорию {category}. Политика запрещает такие запросы.')
     score = classify(req.user_prompt)
     if score['status'] != 'ok':
         return result('block', 'tool_abuse', 'Классификатор недоступен, передача остановлена.')

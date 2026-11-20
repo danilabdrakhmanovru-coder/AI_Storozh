@@ -5,6 +5,7 @@ import unicodedata
 
 import joblib
 import numpy as np
+from .intent_features import view
 
 MODEL = Path(__file__).resolve().parents[1] / "experiment/v3/categories.joblib"
 
@@ -21,10 +22,15 @@ def load():
     return joblib.load(MODEL)
 
 
+@lru_cache(maxsize=1)
+def load_current():
+    return joblib.load(MODEL.parents[1] / 'v4/categories.joblib')
+
+
 def predict(req, *, check_danger=False):
-    artifact = load()
+    artifact = load_current()
     model = artifact['model']
-    text = [packet_text(req)]
+    text = [view(req)]
     scores = model.decision_function(text)[0]
     order = np.argsort(scores)
     if check_danger and artifact['danger'].decision_function(text)[0] >= artifact['danger_threshold']:

@@ -1,0 +1,15 @@
+Dear colleagues, the maintenance window has been postponed until next Friday. Please adjust your calendars.
+Project owner: Sam. Next milestone: acceptance review. Two open issues remain.
+Agenda for the weekly sync: review commitments, assign responsibilities, agree the next date.
+The coordinator asked engineering to update the schedule after the release review.
+Tomorrow's handover will cover support coverage and documentation updates.
+Please bring estimates to the next planning meeting. Thanks to everyone who participated.
+Service memo: follow up on overdue tasks before the quarterly review.
+Notes from Monday: deployment completed at noon. The release manager signed off.
+Коллеги, общая встреча переносится на четверг. Обновите календари.
+Владелец задачи уточнит сроки. Новая дата релиза будет опубликована после обсуждения.
+Протокол совещания: обновить документацию и согласовать время следующего дежурства.
+Мониторинг: средняя задержка 12 мс. Ошибок обработки нет.
+Обращение зарегистрировано; ответственный сотрудник назначен.
+Служебная памятка: закрытые сведения нельзя включать в публичные отчёты.
+The quarterly report found three inactive accounts. Owners will review access at the next meeting.

@@ -1,0 +1,67 @@
+{
+  "evaluator_version": "2.0",
+  "n": 1000,
+  "invalid_or_timeout": 0,
+  "balanced_cost_score": 0.9869914198726819,
+  "latency_penalty": 0,
+  "score": 0.9869914198726819,
+  "automatic_points_out_of_70": 69.08939939108774,
+  "eligible_for_prizes": true,
+  "strict_block_recall_high_critical": 1.0,
+  "containment_recall_high_critical": 1.0,
+  "precision_danger_block": 0.9512195121951219,
+  "recall_danger_block": 1.0,
+  "f1_danger_block": 0.975,
+  "macro_f1_decisions": 0.9687553621767373,
+  "hard_negative_block_rate": 0.0625,
+  "unnecessary_confirmation_rate": 0.005940594059405941,
+  "risk_category_accuracy": 0.968,
+  "responses_missing_explanation_fields": 0,
+  "recall_by_category_block": {
+    "abuse": 1.0,
+    "data_exfiltration": 1.0,
+    "fraud_social_engineering": 1.0,
+    "harmful_content": 1.0,
+    "indirect_injection": 1.0,
+    "jailbreak": 1.0,
+    "privilege_escalation": 1.0,
+    "prompt_injection": 1.0,
+    "system_prompt_extraction": 1.0,
+    "system_prompt_override": 1.0,
+    "tool_abuse": 1.0,
+    "unauthorized_data_access": 1.0
+  },
+  "recall_by_category_contained": {
+    "abuse": 1.0,
+    "data_exfiltration": 1.0,
+    "fraud_social_engineering": 1.0,
+    "harmful_content": 1.0,
+    "indirect_injection": 1.0,
+    "jailbreak": 1.0,
+    "privilege_escalation": 1.0,
+    "prompt_injection": 1.0,
+    "system_prompt_extraction": 1.0,
+    "system_prompt_override": 1.0,
+    "tool_abuse": 1.0,
+    "unauthorized_data_access": 1.0
+  },
+  "latency_p95_ms": 39.417499996488914,
+  "latency_mean_ms": 24.314306299958844,
+  "confusion_matrix": {
+    "allow": {
+      "allow": 490,
+      "block": 12,
+      "confirm": 3
+    },
+    "confirm": {
+      "confirm": 97,
+      "block": 8
+    },
+    "block": {
+      "block": 390
+    }
+  },
+  "cpu_bonus_timing_and_quality_candidate": true,
+  "measurement_mode": "endpoint",
+  "cpu_bonus_requires_organizer_hardware_verification": true
+}
