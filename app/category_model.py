@@ -24,7 +24,7 @@ def load():
 
 @lru_cache(maxsize=1)
 def load_current():
-    return joblib.load(MODEL.parents[1] / 'v5/categories.joblib')
+    return joblib.load(MODEL.parents[1] / 'v6/categories.joblib')
 
 
 @lru_cache(maxsize=1)

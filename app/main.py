@@ -1,6 +1,6 @@
 """ИИ-сторож: API and local operator console. Run with uvicorn app.main:app."""
 import yaml
-from .contest import ContestRequest, inspect_request, read_policy, parse_policy
+from .contest import ContestRequest, InferenceUnavailable, inspect_request, read_policy, parse_policy
 import csv
 import hashlib
 import html
@@ -15,7 +15,9 @@ from pathlib import Path
 from typing import Literal, Optional
 from urllib.parse import urlparse
 from fastapi import FastAPI, Depends, Header, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, StreamingResponse
+from starlette.concurrency import run_in_threadpool
+from .datasets import parse_dataset, predictions, MAX_BYTES
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, model_validator
 from .guard import Policy, check, _level, RECO, COMPILED
@@ -274,6 +276,8 @@ def contest_check(req: ContestRequest, who=Depends(identity)):
     raw, thresholds, pv = contest_policy()
     try:
         response = inspect_request(req, thresholds, raw)
+    except InferenceUnavailable:
+        raise HTTPException(503, 'Проверка модели недоступна. Передача остановлена.')
     except (OSError, ValueError, TypeError, KeyError, AttributeError, yaml.YAMLError):
         raise HTTPException(503, 'Проверка политики недоступна. Передача остановлена.')
     rid = uuid.uuid4().hex
@@ -329,3 +333,33 @@ def contest_journal(who=Depends(identity)):
             """, (who['user_id'],)).fetchall()
     return [dict(row) for row in rows]
 
+
+def dataset_access(request: Request, x_api_key: Optional[str] = Header(None)):
+    key = os.getenv('STOROZH_DATASET_KEY')
+    if key and secrets.compare_digest(x_api_key or '', key):
+        origin = request.headers.get('origin')
+        if origin and urlparse(origin).netloc != request.headers.get('host'):
+            raise HTTPException(403, 'Запрос с другого сайта запрещён')
+        return
+    operator(identity(request, x_api_key))
+
+
+@app.post('/v1/datasets/check', response_class=StreamingResponse, openapi_extra={
+    'requestBody': {'required': True, 'content': {'application/octet-stream': {
+        'schema': {'type':'string','format':'binary'}}}},
+    'responses': {'200': {'description':'Последовательность предсказаний JSONL',
+                           'content': {'application/x-ndjson': {}}}}})
+async def dataset_check(request: Request, format: Literal['jsonl','csv','zip']=Query('jsonl'), access=Depends(dataset_access)):
+    """Проверка загруженного набора. Роли в файле задаёт доверенный оператор."""
+    data = bytearray()
+    async for chunk in request.stream():
+        if len(data) + len(chunk) > MAX_BYTES:
+            raise HTTPException(413, 'Файл превышает 32 МиБ.')
+        data.extend(chunk)
+    packets = await run_in_threadpool(parse_dataset, data, format)
+    del data
+    raw, thresholds, pv = contest_policy()
+    return StreamingResponse(predictions(packets, raw, thresholds), media_type='application/x-ndjson',
+        headers={'X-Total-Rows':str(len(packets)), 'X-Policy-Version':pv,
+                 'Cache-Control':'no-store', 'X-Accel-Buffering':'no',
+                 'Content-Disposition':'attachment; filename="predictions.jsonl"'})

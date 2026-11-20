@@ -13,6 +13,10 @@ from .category_model import predict, risk_level
 from .guard import COMPILED, normalize
 
 
+class InferenceUnavailable(RuntimeError):
+    """A required model failed; the caller must not forward the packet."""
+
+
 class PacketPart(BaseModel):
     model_config = {"extra": "allow"}
 
@@ -134,10 +138,18 @@ def _inspect(req, thresholds, raw_policy):
     role = agent.get('roles', {}).get(ctx.user_role, {})
     text = normalize(req.user_prompt)[0]
     educational = EDUCATIONAL.search(text) and not DIRECTIVE.search(text)
+    pipe_definition = bool(re.fullmatch(
+        r'(?:hi[!,]?\s*)?explain why (?:curl|wget)\s*\|\s*(?:ba)?sh '
+        r'(?:installs? )?(?:is|are) (?:dangerous|unsafe|risky)[.?! ]*(?:please[.! ]*)?', text))
     for source, content in [('attachment', a.content) for a in ctx.attachments] + [
         ('history', m.content) for m in ctx.history if m.role != 'system'
     ] + [('prompt', req.user_prompt)]:
         views = normalize(content)
+        if ('jailbreak' in policy['always_block'] and re.search(
+                r'\b(?:you are now|act as|pretend to be)\b.{0,85}\b(?:unfiltered|amoral|unrestricted)\b'
+                r'.{0,60}\b(?:assistant|chatbot|agent|model)\b', views[0])):
+            category = 'indirect_injection' if source == 'attachment' else 'jailbreak'
+            return result('block', category, 'Запрошена роль ассистента без ограничений.')
         violation = requested_violation(views[0])
         if violation and (violation in policy['always_block'] or violation in policy['context_dependent']):
             category = 'indirect_injection' if source == 'attachment' else violation
@@ -147,9 +159,7 @@ def _inspect(req, thresholds, raw_policy):
         for rid, category, weight, regex in COMPILED:
             if not any(regex.search(view) for view in views):
                 continue
-            if (rid == 'rce_pipe' and source == 'prompt' and re.fullmatch(
-                    r'(?:hi[!,]?\s*)?explain why (?:curl|wget)\s*\|\s*(?:ba)?sh '
-                    r'(?:installs? )?(?:is|are) (?:dangerous|unsafe|risky)[.?! ]*(?:please[.! ]*)?', text)):
+            if rid == 'rce_pipe' and source == 'prompt' and pipe_definition:
                 continue
             if (rid == 'rce_pipe' and source == 'prompt' and
                     re.fullmatch(r'(?:что (?:такое|означает)|what (?:is|does)) (?:термин |the term )?'
@@ -164,6 +174,8 @@ def _inspect(req, thresholds, raw_policy):
                     or (category == 'tool_abuse' and weight >= 0.7)):
                 return result('block', category, f'Сработало правило {rid}, источник {source}.')
     for action in agent.get('forbidden_actions', []):
+        if action == 'pipe_remote_script_to_shell' and pipe_definition:
+            continue
         if action not in FORBIDDEN:
             raise ValueError('Неизвестное запрещённое действие')
         if re.search(FORBIDDEN[action], text):
@@ -206,15 +218,15 @@ def _inspect(req, thresholds, raw_policy):
                     'context':ctx.model_copy(update={'history':[], 'attachments':[]})})
                 if predict(doc) == category:
                     return result('block', 'indirect_injection', f'Во вложении обнаружена инструкция категории {category}.')
-    except Exception:
-        return result('block', 'tool_abuse', 'Модель категорий недоступна. Передача остановлена.')
+    except Exception as exc:
+        raise InferenceUnavailable('Модель категорий недоступна.') from exc
     score = classify(req.user_prompt)
     if score['status'] != 'ok':
-        return result('block', 'tool_abuse', 'Классификатор недоступен, передача остановлена.')
+        raise InferenceUnavailable('Классификатор недоступен.')
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v5 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v6 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result
