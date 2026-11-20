@@ -7,7 +7,7 @@ import joblib
 
 from .jailbreak_intent import features
 
-MODEL = Path(__file__).resolve().parents[1] / "experiment/v12/intent.joblib"
+MODEL = Path(__file__).resolve().parents[1] / "experiment/v13/intent.joblib"
 BEHAVIOR = re.compile(
     r"модерир|модерац|проверк.{0,30}(?:ответ|реплик)|защитн.{0,20}проверк|"
     r"фильтр|ограничени|рамки ии|рамок ии|этическ|моральн|цензур|"
@@ -56,6 +56,27 @@ def current_features(req):
     return representation(req) + " " + " ".join("jb_request_" + flag for flag in flags)
 
 
+CHECK = re.compile(r"проверк\w* допустимост|провер\w*.{0,24}безопасност|защит\w*.{0,30}провер|"
+                   r"safety (?:review|screening|checks?)|content review|output screening")
+LIFT = re.compile(r"отмен[иая]|переста|приостанов|не проверял|больше не|без проверк|не применя|"
+                  r"не проход|on hold|suspend|dispense|stop|switch off|set aside|cease")
+OUTPUT_SCOPE = re.compile(r"отвеча|ответ|реплик|сообщени|выда[её]|repl(?:y|ies)|outputs?|responses?|answers?")
+UNBOUND = re.compile(r"не связан|нет ограничен|без.{0,15}(?:морал|ограничен)|безусловно допустим|"
+                     r"люб\w+ (?:просьб|запрос)|вс[её] (?:разрешено|допустимо)|"
+                     r"no (?:ethics|limits|restrictions)|not bound|anything (?:goes|is allowed)|"
+                     r"unconditional compliance|unrestricted|amoral|never say no")
+
+
+def scoped_features(req):
+    text = req.user_prompt.casefold()
+    flags = []
+    if CHECK.search(text) and LIFT.search(text) and OUTPUT_SCOPE.search(text):
+        flags.append("suspend_output_review")
+    if (ROLE.search(text) or PERSONA.search(text)) and UNBOUND.search(text):
+        flags.append("unbound_speaker")
+    return current_features(req) + " " + " ".join("jb_request_" + flag for flag in flags)
+
+
 @lru_cache(maxsize=1)
 def load():
     return joblib.load(MODEL)
@@ -63,5 +84,24 @@ def load():
 
 def assessment(req):
     model = load()
-    scores = dict(zip(model.classes_, model.decision_function([current_features(req)])[0]))
+    scores = dict(zip(model.classes_, model.decision_function([scoped_features(req)])[0]))
+    text = req.user_prompt
+    if (len(text) >= 600 and not req.context.attachments and not req.context.history
+            and -0.55 < scores['jailbreak'] < 0.60 and (ROLE.search(text.casefold()) or PERSONA.search(text.casefold()))):
+        # Long role descriptions may contain a single paragraph defining the
+        # requested behaviour. Only a strongly positive local score counts.
+        sentences = re.split(r'(?<=[.!?])\s+|\n+', text)
+        windows = []
+        for i in range(len(sentences)):
+            segment = " ".join(sentences[max(0, i-1):i+2])[:1200]
+            if (UNBOUND.search(sentences[i].casefold()) or MANDATE.search(sentences[i].casefold())):
+                windows.append(scoped_features(req.model_copy(update={'user_prompt': segment})))
+                if len(windows) == 4:
+                    break
+        if windows:
+            margins = model.decision_function(windows)
+            column = list(model.classes_).index('jailbreak')
+            local = margins[margins[:, column].argmax()]
+            if local[column] >= 0.70:
+                return dict(zip(model.classes_, local))
     return scores

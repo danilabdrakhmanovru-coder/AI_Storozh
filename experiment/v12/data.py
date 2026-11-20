@@ -8,14 +8,19 @@ EXTERNAL_JB = """5969 3398 2555 7963 7892 6171 4989 2457 766 6577 1166 4185 2047
 6362 7796 548 4692 7656 4287 1890 2231 788 3867 8006 7283 7291 622 4565"""
 
 
-def evaluation():
+def sector_rows(path):
     result = []
-    for line in (OUT / "sectors.txt").read_text("utf8").splitlines():
+    for line in path.read_text("utf8").splitlines():
         domain, group, *texts = line.split("|")
         for prompt in texts:
             row = make_row(f"{domain}-{len(result)+1:03}", group, prompt)
             row["domain"] = domain
             result.append(row)
+    return result
+
+
+def evaluation():
+    result = sector_rows(OUT / "sectors.txt")
     rows = source()
     safe, candidates = partition(rows)
     old = (OUT.parent / "v11/labels.txt").read_text().splitlines()

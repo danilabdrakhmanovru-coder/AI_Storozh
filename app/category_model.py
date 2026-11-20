@@ -68,7 +68,8 @@ def predict(req, *, check_danger=False, prioritize_jailbreak=True):
         if (check_danger and not req.context.history
                 and intent['other'] < -0.35 and intent['jailbreak'] < -0.35
                 and ((danger < 0.30 and ordinary >= 0.35)
-                     or (danger < 0.80 and ordinary >= 0.55))):
+                     or (danger < 0.80 and ordinary >= 0.55)
+                     or (danger < 0.95 and ordinary >= 0.85 and intent['other'] < -0.75))):
             return 'none'
     if label == 'jailbreak':
         return label

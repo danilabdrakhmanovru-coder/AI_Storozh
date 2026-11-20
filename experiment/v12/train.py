@@ -6,7 +6,7 @@ from experiment.v12.data import OUT, evaluation
 from app.request_intent import current_features
 
 
-if __name__ == "__main__":
+def development_rows():
     rows = training_data() + training_rows(OUT / "training.txt")
     corpus = source()
     safe, _ = partition(corpus)
@@ -15,5 +15,10 @@ if __name__ == "__main__":
         for index in indices:
             for field in ("text", "translation"):
                 rows.append(make_row(f"train-{index}", group, corpus[index][field].strip()))
+    return rows
+
+
+if __name__ == "__main__":
+    rows = development_rows()
     withheld = {normal(r["user_prompt"]) for r in previous() + evaluation()}
     fit(rows, current_features, OUT / "intent.joblib", withheld)

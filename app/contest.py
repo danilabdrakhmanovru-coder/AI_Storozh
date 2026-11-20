@@ -12,7 +12,7 @@ from .classifier import classify
 from .category_model import predict, risk_level
 from .guard import COMPILED, normalize
 from .jailbreak_intent import signals as jailbreak_signals
-from .request_intent import assessment
+from .request_intent import assessment, PERSONA
 
 
 ROLE_RULES = [(rid, regex) for rid, _, _, regex in COMPILED if rid in {'inj_roleplay', 'jb_dan'}]
@@ -69,6 +69,26 @@ LIST_EDIT = re.compile(
     r'(?:remove|delete) (?:duplicate|repeated) letters from (?:this|the following) sample: [a-z]{2,32}|'
     r'удали(?:те)? (?:повторы|повторяющиеся числа) (?:в этом списке|из этого списка|из следующего ряда): '
     r'-?\d+(?:\s*,\s*-?\d+)+)[.?!]?')
+
+WORD_LIST_EDIT = re.compile(
+    r'(?:(?:remove|delete) (?:repeated|duplicate) words from (?:this|the following) '
+    r'(?:[a-z]{1,18} )?(?:caption|description|sentence|list)|'
+    r'удали(?:те)? повторы (?:в этом списке|из этого списка)(?: (?:слов|им[её]н|названий(?: [а-яё]{1,18})?))?)'
+    r':\s*([a-zа-яё]{1,30}(?:(?:,\s*| )[a-zа-яё]{1,30}){1,20})[.!?]?')
+
+
+def literal_list_edit(text):
+    if LIST_EDIT.fullmatch(text):
+        return True
+    match = WORD_LIST_EDIT.fullmatch(text)
+    if not match:
+        return False
+    words = re.findall(r'[a-zа-яё]+', match[1])
+    # Treat only a repeated literal value as the operand. Any second action
+    # in the value keeps the normal policy and permission checks.
+    return len(set(words)) < len(words) and not any(re.search(p, match[1]) for p in TOOLS.values())
+
+
 FORBIDDEN = {
     'disable_audit_or_wipe_logs': r'(?:отключи|сотри|очисти|disable|wipe|clear).{0,30}(?:аудит|журнал|логи|audit|logs)',
     'pipe_remote_script_to_shell': r'(?:curl|wget)\b[^|]{0,200}\|\s*(?:ba)?sh',
@@ -223,12 +243,14 @@ def _inspect(req, thresholds, raw_policy):
                 # without safeguards. Resolve its type; both decisions block.
                 if (source == 'prompt' and not ctx.attachments and not ctx.history
                         and not educational and 'jailbreak' in policy['always_block']
-                        and category in {'prompt_injection', 'system_prompt_override'}):
+                        and (category in {'prompt_injection', 'system_prompt_override'}
+                             or (rid == 'priv_claim' and PERSONA.search(text)))):
                     try:
                         intent = assessment(req)
                     except Exception as exc:
                         raise InferenceUnavailable('Модель намерения недоступна.') from exc
-                    if intent['jailbreak'] >= 0.60 and max(intent['ordinary'], intent['other']) < -0.30:
+                    minimum = 1.0 if rid == 'priv_claim' else 0.60
+                    if intent['jailbreak'] >= minimum and max(intent['ordinary'], intent['other']) < -0.30:
                         return result('block', 'jailbreak', f'Правило {rid} и модель выявили попытку снять защиту.')
                 if (source == 'prompt' and not ctx.attachments and not educational
                         and category in {'prompt_injection', 'system_prompt_override'}
@@ -263,7 +285,7 @@ def _inspect(req, thresholds, raw_policy):
         if 'nonprod' in environments and {'dev', 'stage', 'test', 'staging', 'development'} & set(words):
             matched.append('nonprod')
         for tool, pattern in TOOLS.items():
-            if tool == 'delete_resource' and not ctx.history and not ctx.attachments and LIST_EDIT.fullmatch(text.strip()):
+            if tool == 'delete_resource' and not ctx.history and not ctx.attachments and literal_list_edit(text.strip()):
                 continue
             if tool == literal_tool or re.search(pattern, text):
                 rule = role.get('tools', {}).get(tool, 'deny') if tool in agent.get('tools', []) else 'deny'
@@ -297,7 +319,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v12 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v13 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result
