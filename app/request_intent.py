@@ -116,6 +116,12 @@ LANGUAGE_TASK = re.compile(r"преподавател|произношени|г�
 OUTPUT_CHECK = re.compile(r"what you (?:may|can) safely say|screening of (?:its|your) own (?:repl|answer)|"
                           r"checks? on (?:what|how safely) you|проверк\w* того.{0,40}безопасн")
 PAUSED = re.compile(r"switch(?:ed)? off|turn(?:ed)? off|suspend\w*|disabl\w*|inactive|отключ\w*|приостанов\w*")
+REPLY_CONTROL = re.compile(
+    r'(?:reply|answer|response|output) (?:checks?|screening|moderation)|'
+    r'(?:проверк\w* допустимости|модераци\w*|контроль безопасности).{0,28}(?:реплик|ответ|сообщени)')
+WAIVER = re.compile(
+    r'\b(?:disabled|suspended|inactive|waived|lifted)\b|\b(?:не применяй|отключи|отмени|приостанови)\b')
+REFUSAL = re.compile(r'never refus\w*|even (?:when|if).{0,45}(?:forbid|refus)|нельзя отказыв\w*|даже (?:при|если|когда)')
 
 
 def intent_features(req):
@@ -125,6 +131,11 @@ def intent_features(req):
         tokens.append("speaker_task")
     if OUTPUT_CHECK.search(text) and PAUSED.search(text):
         tokens.append("output_checks_paused")
+    if REPLY_CONTROL.search(text) and WAIVER.search(text):
+        tokens.append("waived_reply_control")
+    if (REFUSAL.search(text) and re.search(r'safety|safeguard|безопасност|защитн', text)
+            and re.search(r'reply as|speak as|role|coach|narrator|persona|говори|отвеча|дубл[её]р|роль', text)):
+        tokens.append("persona_must_answer")
     return scoped_features(req) + " " + " ".join("jb_request_" + token for token in tokens)
 
 

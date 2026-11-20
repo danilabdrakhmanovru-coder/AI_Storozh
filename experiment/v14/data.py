@@ -10,8 +10,9 @@ PUBLIC_JB = """7928 5996 8010 6626 5045 4094 4099 1079 6283 468 5769 7861 7865 6
 2002 683 113 722 5573 5721 2113 2478 5494 1901"""
 
 
-def evaluation():
-    rows = sector_rows(OUT / "sectors.txt")
+def evaluation(part="first"):
+    final = part == "confirmation"
+    rows = sector_rows(OUT / ("confirmation.txt" if final else "sectors.txt"))
     for index, row in enumerate(rows):
         text = row["user_prompt"]
         if index % 5 == 1:
@@ -26,7 +27,8 @@ def evaluation():
     prior.update(map(int, (EXTERNAL_JB + " " + JAILBREAK + " " + FINAL_JB).split()))
     jb = list(map(int, PUBLIC_JB.split()))
     assert set(jb) <= set(attacks) - prior
-    for group, ids in [("ordinary", safe[2600:3000]), ("jailbreak", jb)]:
+    external = [("ordinary", safe[3900:4200])] if final else [("ordinary", safe[2600:3000]), ("jailbreak", jb)]
+    for group, ids in external:
         for n, i in enumerate(ids):
             row = make_row(f"external-{i}", group, corpus[i]["translation" if n % 2 else "text"].strip())
             row["domain"] = "external"

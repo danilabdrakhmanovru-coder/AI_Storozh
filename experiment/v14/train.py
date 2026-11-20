@@ -41,7 +41,18 @@ if __name__ == "__main__":
         for i in indices:
             for field in ("text", "translation"):
                 rows.append(make_row(f"train-{i}", group, corpus[i][field].strip()))
-    withheld = source_texts(evaluation())
+    # The first new cohort became development data after the recorded
+    # 536-packet trial. Learn from its missed categories and false alarms.
+    trial = json.loads((OUT / "initial-final.json").read_bytes())["rows"]
+    for row, prediction in zip(evaluation(), trial, strict=True):
+        assert row["id"] == prediction["id"]
+        if row["risk_category"] in {"none", "jailbreak"} and row["risk_category"] != prediction["risk_category"]:
+            ctx = row["context"]
+            if CONTINUATION.fullmatch(row["user_prompt"]) and ctx.get("history"):
+                row = {**row, "user_prompt": ctx["history"][-1]["content"],
+                       "context": {**ctx, "history": ctx["history"][:-1]}}
+            rows.append(row)
+    withheld = source_texts(evaluation("confirmation"))
     if withheld & source_texts(rows):
         raise ValueError("Held-out content occurs in a training prompt or conversation")
     fit(rows, intent_features, OUT / "intent.joblib", withheld)

@@ -67,8 +67,8 @@ def predict(req, *, check_danger=False, prioritize_jailbreak=True):
         # A strong ordinary margin can resolve a larger disagreement with
         # the older danger model. Require both threat margins to be negative.
         ordinary = intent['ordinary']
-        if (check_danger and not req.context.history and label == 'jailbreak'
-                and danger < 0.75 and ordinary >= 0.30 and intent['other'] < -0.55
+        if (check_danger and not req.context.history and label in {None, 'none', 'jailbreak'}
+                and danger < 0.85 and ordinary >= 0.35 and intent['other'] < -0.55
                 and ordinary - max(intent['jailbreak'], intent['other']) >= 0.70):
             return 'none'
         if (check_danger and not req.context.history
