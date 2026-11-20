@@ -15,7 +15,7 @@ from experiment.v6.train import training_rows
 OUT = Path(__file__).resolve().parent
 
 
-def main(*, extra_rows=(), encode=model_text, destination=MODEL, extra_features=(), feature_weights=None):
+def base_rows():
     excluded = set(json.loads((ROOT / "experiment/v3/split.json").read_bytes())["holdout_ids"])
     rows = [r for r in lines(ROOT / "artifacts/astra_public/dev.jsonl") if r["id"] not in excluded]
     rows.extend(r for r in lines(ROOT / "experiment/synthetic1000/cases.jsonl") if r["tags"][0] == "bank")
@@ -29,7 +29,11 @@ def main(*, extra_rows=(), encode=model_text, destination=MODEL, extra_features=
             {"role": "assistant", "content": "Yes." if english else "Да."}]}
         rows.append({**r, "context": context})
 
-    rows.extend(extra_rows)
+    return rows
+
+
+def main(*, extra_rows=(), encode=model_text, destination=MODEL, extra_features=(), feature_weights=None):
+    rows = [*base_rows(), *extra_rows]
     examples = {}
     for r in rows:
         text = encode(ContestRequest.model_validate(r))

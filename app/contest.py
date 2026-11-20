@@ -12,6 +12,7 @@ from .classifier import classify
 from .category_model import predict, risk_level
 from .guard import COMPILED, normalize
 from .jailbreak_intent import signals as jailbreak_signals
+from .request_intent import assessment
 
 
 ROLE_RULES = [(rid, regex) for rid, _, _, regex in COMPILED if rid in {'inj_roleplay', 'jb_dan'}]
@@ -208,6 +209,17 @@ def _inspect(req, thresholds, raw_policy):
                 continue
             if category in policy['always_block'] or (category == 'unauthorized_data_access'
                     or (category == 'tool_abuse' and weight >= 0.7)):
+                # A generic override can introduce a request for a persona
+                # without safeguards. Resolve its type; both decisions block.
+                if (source == 'prompt' and not ctx.attachments and not ctx.history
+                        and not educational and 'jailbreak' in policy['always_block']
+                        and category in {'prompt_injection', 'system_prompt_override'}):
+                    try:
+                        intent = assessment(req)
+                    except Exception as exc:
+                        raise InferenceUnavailable('Модель намерения недоступна.') from exc
+                    if intent['jailbreak'] >= 0.70 and max(intent['ordinary'], intent['other']) < 0:
+                        return result('block', 'jailbreak', f'Правило {rid} и модель выявили попытку снять защиту.')
                 if (source == 'prompt' and not ctx.attachments and not educational
                         and category in {'prompt_injection', 'system_prompt_override'}
                         and 'jailbreak' in policy['always_block']
@@ -273,7 +285,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v10 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v11 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result
