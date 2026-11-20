@@ -1,4 +1,7 @@
 """ИИ-сторож: API and local operator console. Run with uvicorn app.main:app."""
+import logging
+import yaml
+from .contest import ContestRequest, inspect_request
 import csv
 import hashlib
 import html
@@ -246,3 +249,17 @@ def selftest(who=Depends(operator)):
 @app.get('/',response_class=HTMLResponse)
 @app.get('/ui',response_class=HTMLResponse)
 def ui():return (ROOT/'static/index.html').read_text(encoding='utf-8')
+
+@app.post('/v1/check')
+def contest_check(req: ContestRequest, who=Depends(identity)):
+    start = time.perf_counter()
+    if not who['admin']:
+        req.context.user_role = who['role']
+    try:
+        response = inspect_request(req, policy.data['thresholds'])
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, yaml.YAMLError):
+        raise HTTPException(503, 'Проверка политики недоступна. Передача остановлена.')
+    response['latency_ms'] = round((time.perf_counter() - start) * 1000, 3)
+    logging.getLogger('uvicorn.error').info('contest_check decision=%s category=%s latency_ms=%s',
+        response['decision'], response['risk_category'], response['latency_ms'])
+    return response
