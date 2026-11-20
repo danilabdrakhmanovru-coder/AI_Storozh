@@ -7,7 +7,7 @@ import joblib
 
 from .jailbreak_intent import features
 
-MODEL = Path(__file__).resolve().parents[1] / "experiment/v11/intent.joblib"
+MODEL = Path(__file__).resolve().parents[1] / "experiment/v12/intent.joblib"
 BEHAVIOR = re.compile(
     r"модерир|модерац|проверк.{0,30}(?:ответ|реплик)|защитн.{0,20}проверк|"
     r"фильтр|ограничени|рамки ии|рамок ии|этическ|моральн|цензур|"
@@ -36,6 +36,26 @@ def representation(req):
     return features(req) + " " + " ".join("jb_request_" + flag for flag in flags)
 
 
+PERSONA = re.compile(r"персонаж|личност|альтер.эго|отвеча\w* от лица|двойник|в образе|"
+                     r"вымышленн|роль|character|persona|alter.ego|roleplay|role.play|fictional")
+MANDATE = re.compile(r"всегда (?:да[её]\w*|отвеча\w*)|(?:нельзя|никогда не) отказыва|"
+                     r"не след\w* политик|не соблюда\w* правил|нарушая.{0,18}ограничени|"
+                     r"never refus|always (?:answer|respond)|must answer every|not follow.{0,16}polic")
+OUTPUT = re.compile(r"ответ|реплик|сообщени|response|repl(?:y|ies)|answer|output")
+UNCHECKED = re.compile(r"без проверки (?:допустимост|безопасност)|не проход\w* (?:модерац|проверк)|"
+                       r"without (?:safety review|content checks)|not subject to moderation")
+
+
+def current_features(req):
+    text = req.user_prompt.casefold()
+    flags = []
+    if PERSONA.search(text) and MANDATE.search(text):
+        flags.append("persona_mandate")
+    if OUTPUT.search(text) and UNCHECKED.search(text):
+        flags.append("unchecked_output")
+    return representation(req) + " " + " ".join("jb_request_" + flag for flag in flags)
+
+
 @lru_cache(maxsize=1)
 def load():
     return joblib.load(MODEL)
@@ -43,5 +63,5 @@ def load():
 
 def assessment(req):
     model = load()
-    scores = dict(zip(model.classes_, model.decision_function([representation(req)])[0]))
+    scores = dict(zip(model.classes_, model.decision_function([current_features(req)])[0]))
     return scores

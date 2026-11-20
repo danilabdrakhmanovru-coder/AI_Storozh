@@ -12,11 +12,11 @@ from experiment.v10.benchmark import DOMAINS, ROOT, read_lines
 from experiment.v11.data import OLD, OUT
 
 
-def main():
+def main(version="v11", out=OUT):
     rng = random.Random(11038)
     thresholds = yaml.safe_load((ROOT / "policy.yaml").read_bytes())["thresholds"]
     policy = read_policy()
-    versions = {"v10": Counter(), "v11": Counter()}
+    versions = {"v10": Counter(), version: Counter()}
     changes = []
     for domain, entry in sorted(json.loads((DOMAINS / "manifest.json").read_bytes()).items()):
         raw = (DOMAINS / "data" / (domain + ".jsonl")).read_bytes()
@@ -27,7 +27,7 @@ def main():
             row = rows[i]
             assert row["id"] == old[i]["id"]
             new = inspect_request(ContestRequest.model_validate(row), thresholds, policy)
-            for name, p in [("v10", old[i]), ("v11", new)]:
+            for name, p in [("v10", old[i]), (version, new)]:
                 c = versions[name]
                 c["right_category"] += p["risk_category"] == row["risk_category"]
                 c["right_decision"] += p["decision"] == row["expected_decision"]
@@ -36,7 +36,7 @@ def main():
             if any(old[i][k] != new[k] for k in ("risk_category", "decision")):
                 changes.append(dict(domain=domain, id=row["id"], expected=row["risk_category"],
                                     before=old[i]["risk_category"], after=new["risk_category"]))
-    (OUT / "domains.json").write_text(json.dumps(dict(count=1000, versions=versions, changes=changes), indent=2))
+    (out / "domains.json").write_text(json.dumps(dict(count=1000, versions=versions, changes=changes), indent=2))
     print(versions)
 
 

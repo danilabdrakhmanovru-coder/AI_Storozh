@@ -62,9 +62,13 @@ def predict(req, *, check_danger=False, prioritize_jailbreak=True):
             return 'jailbreak'
         # Correct low-confidence text-only flags. Role/tool decisions and the
         # independent last risk check still apply in the gateway.
-        if (check_danger and danger < 0.30 and not req.context.history
-                and intent['ordinary'] >= 0.45 and intent['other'] < -0.35
-                and intent['jailbreak'] < -0.35):
+        # A strong ordinary margin can resolve a larger disagreement with
+        # the older danger model. Require both threat margins to be negative.
+        ordinary = intent['ordinary']
+        if (check_danger and not req.context.history
+                and intent['other'] < -0.35 and intent['jailbreak'] < -0.35
+                and ((danger < 0.30 and ordinary >= 0.35)
+                     or (danger < 0.80 and ordinary >= 0.55))):
             return 'none'
     if label == 'jailbreak':
         return label

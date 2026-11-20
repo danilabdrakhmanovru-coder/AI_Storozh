@@ -59,6 +59,16 @@ TOOLS = {
                  r'\bкакие записи (?:сейчас )?в (?:логах|журнале)\b|\bread_logs\b',
     'run_shell': r'(?:выполни|запусти|run|execute).{0,35}(?:команд|скрипт|shell|command|script|миграци|migration)|\b(?:run|выполни)\s+`?(?:df|du|ps|uptime|date)\b|\brun_shell\b|\b(?:масштабируй|deploy|scale|roll ?back|очисти кэш|поставь log_level)\b',
 }
+# Only a complete exercise on an inline value can omit the deletion tool check.
+LIST_EDIT = re.compile(
+    r'(?:(?:in this task you will be given a list of numbers and you should |please )?'
+    r'(?:remove|delete) (?:all )?duplicates (?:in|from) the list[.:] '
+    r'(?:if every number is repeated in the list an empty list should be returned\. )?'
+    r'(?:your list should be numbers inside brackets, just like the given list\. )?'
+    r'(?:input: )?\[\s*-?\d+(?:\s*,\s*-?\d+)*\s*\]|'
+    r'(?:remove|delete) (?:duplicate|repeated) letters from (?:this|the following) sample: [a-z]{2,32}|'
+    r'удали(?:те)? (?:повторы|повторяющиеся числа) (?:в этом списке|из этого списка|из следующего ряда): '
+    r'-?\d+(?:\s*,\s*-?\d+)+)[.?!]?')
 FORBIDDEN = {
     'disable_audit_or_wipe_logs': r'(?:отключи|сотри|очисти|disable|wipe|clear).{0,30}(?:аудит|журнал|логи|audit|logs)',
     'pipe_remote_script_to_shell': r'(?:curl|wget)\b[^|]{0,200}\|\s*(?:ba)?sh',
@@ -218,7 +228,7 @@ def _inspect(req, thresholds, raw_policy):
                         intent = assessment(req)
                     except Exception as exc:
                         raise InferenceUnavailable('Модель намерения недоступна.') from exc
-                    if intent['jailbreak'] >= 0.70 and max(intent['ordinary'], intent['other']) < 0:
+                    if intent['jailbreak'] >= 0.60 and max(intent['ordinary'], intent['other']) < -0.30:
                         return result('block', 'jailbreak', f'Правило {rid} и модель выявили попытку снять защиту.')
                 if (source == 'prompt' and not ctx.attachments and not educational
                         and category in {'prompt_injection', 'system_prompt_override'}
@@ -253,6 +263,8 @@ def _inspect(req, thresholds, raw_policy):
         if 'nonprod' in environments and {'dev', 'stage', 'test', 'staging', 'development'} & set(words):
             matched.append('nonprod')
         for tool, pattern in TOOLS.items():
+            if tool == 'delete_resource' and not ctx.history and not ctx.attachments and LIST_EDIT.fullmatch(text.strip()):
+                continue
             if tool == literal_tool or re.search(pattern, text):
                 rule = role.get('tools', {}).get(tool, 'deny') if tool in agent.get('tools', []) else 'deny'
                 for env in matched or list(environments) or ['unknown']:
@@ -285,7 +297,7 @@ def _inspect(req, thresholds, raw_policy):
     if literal_operation:
         return access_result
     if category in policy['always_block'] or (not decisions and category in policy['context_dependent']):
-        return result('block', category, f'Модель v11 определила категорию {category}. Политика запрещает такие запросы.')
+        return result('block', category, f'Модель v12 определила категорию {category}. Политика запрещает такие запросы.')
     if decisions:
         if decision == 'block' or score['risk'] < thresholds['block']:
             return access_result

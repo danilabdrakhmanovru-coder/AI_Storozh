@@ -23,7 +23,7 @@ def normal(text):
     return " ".join(re.findall(r"\w+", text.casefold()))
 
 
-def split(rows):
+def partition(rows):
     seen = {r["index"] for path in (HERE / "manifest.json", OUT.parent / "v9/external-control.json")
             for r in json.loads(path.read_bytes())["rows"] if r["source"] == "benchmark2"}
     seen.update(map(int, (ROLE_CASES + " " + ORDINARY_CASES).split()))
@@ -40,6 +40,11 @@ def split(rows):
             continue
         used.update(keys)
         (safe if row["label"] == "0" else attacks).append(i)
+    return safe, attacks
+
+
+def split(rows):
+    safe, attacks = partition(rows)
     return safe[:500], safe[500:750], attacks
 
 

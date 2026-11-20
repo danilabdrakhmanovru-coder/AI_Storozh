@@ -10,7 +10,7 @@ from experiment.v10.benchmark import ROOT, holdout, scores
 from experiment.v11.data import OUT, evaluation
 
 
-def run(version, name, rows):
+def run(version, name, rows, out=OUT):
     thresholds = yaml.safe_load((ROOT / "policy.yaml").read_bytes())["thresholds"]
     policy = read_policy()
     results = []
@@ -20,7 +20,7 @@ def run(version, name, rows):
                             reason=p["explanation"]))
     digest = hashlib.sha256(json.dumps(rows, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     report = dict(sha256=digest, scores=scores(rows, results), rows=results)
-    (OUT / f"{version}-{name}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), "utf8")
+    (out / f"{version}-{name}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), "utf8")
     print(name, report["scores"], flush=True)
 
 
