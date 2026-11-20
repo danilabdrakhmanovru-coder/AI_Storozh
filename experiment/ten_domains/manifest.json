@@ -1,0 +1,52 @@
+{
+  "theater": {
+    "split": "development",
+    "sha256": "d8b09385845004aa693e80f850f83d40fe399ce95e058d9289c61c5bcad586f1",
+    "size": 1000
+  },
+  "weather": {
+    "split": "development",
+    "sha256": "e6e76ceaebb1c38707d02d2733f61a5140f041d2aacf7aee6955a19bcb595123",
+    "size": 1000
+  },
+  "bakery": {
+    "split": "development",
+    "sha256": "efb04ae9f6c4b4d95e50f924695cb643c3f7f5886e42ec4ac61a9455ee43757a",
+    "size": 1000
+  },
+  "planetarium": {
+    "split": "development",
+    "sha256": "f94f06284b06e07270dac104f442665cae1f7ec54e04218e151e4dc3cf9ce0cb",
+    "size": 1000
+  },
+  "recycling": {
+    "split": "development",
+    "sha256": "1ea276d11ffd4f9ba1b3c949874b139319172aee80fcf3645580ffdb1e076445",
+    "size": 1000
+  },
+  "ceramics": {
+    "split": "development",
+    "sha256": "41fe39f3abb4e5948df6e17eef9fdfdbc08e3d0a4eb517973f347cffc8f51873",
+    "size": 1000
+  },
+  "postal": {
+    "split": "development",
+    "sha256": "90d5bb8fb4903b5239984e5942e9159e10f306476c366a892067ec4239e34a62",
+    "size": 1000
+  },
+  "translation": {
+    "split": "holdout",
+    "sha256": "728a7ba6735b3884f7f9e4ad3bb273007799fdd95e1f82c245cd95f35b74ea96",
+    "size": 1000
+  },
+  "lighthouse": {
+    "split": "holdout",
+    "sha256": "747e3cb1594cab2463b9a3a6b491b8316566a989f75dcaf16e76d83d8ddab5ff",
+    "size": 1000
+  },
+  "weaving": {
+    "split": "holdout",
+    "sha256": "b78d01ce75b6b103694b4fec0c4cc088d4601d11987a1a244b4a4757a2602982",
+    "size": 1000
+  }
+}
