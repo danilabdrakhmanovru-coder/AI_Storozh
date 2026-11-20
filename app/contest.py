@@ -61,6 +61,35 @@ CATEGORIES = {
 }
 DIRECTIVE = re.compile(r'\b(?:перезапусти|выполни|отправь|удали|покажи|запусти|игнорируй|execute|delete|send|ignore)\b', re.I)
 EDUCATIONAL = re.compile(r'^(?:объясни|расскажи|что (?:такое|делает)|как работает|explain|what (?:is|does)|how does)\b', re.I)
+REQUEST_ACTION = re.compile(
+    r'\b(?:покажи|перешли|пришли|выгрузи|дай|открой|предоставь|передай|'
+    r'составь|подготовь|придумай|создай|напиши|сгенерируй|сделай|show|send|export|write|create|draft|design)\b')
+FRAUD = re.compile(
+    r'\b(?:фишингов\w*\s+(?:письм|сообщени|страниц)|(?:выманить|вымани|обманом получить)'
+    r'.{0,65}(?:парол|код|токен|деньги)|phishing\s+(?:email|message|page))')
+CREDENTIAL = re.compile(r'парол|одноразов\w+ код|код\w* (?:mfa|из смс)|password|credentials|one.time code')
+DECEPTION = re.compile(r'фейков|поддельн|обманом|притвор|выдавая себя|от имени|fake|impersonat|posing as')
+SOLICIT = re.compile(r'собрать|собирать|выведать|ввести|ввели|продиктовать|прислать|'
+                     r'collect|harvest|enter|share|disclose|provide')
+PRIVATE = re.compile(r'\b(?:чуж\w+|без (?:\w+ ){0,2}(?:согласия|разрешения)|'
+                     r'другого (?:пациента|клиента|пользователя)|without (?:their )?(?:permission|consent))\b')
+RECORD = re.compile(r'выписк|сч[её]т|транзакци|платеж|медицинск|карт[ауые]|заключени|анализ'
+                    r'|диагноз|истори|переписк|обращени|тикет|журнал|запис|данны|record|transcript')
+
+
+def requested_violation(text):
+    for action in REQUEST_ACTION.finditer(text):
+        # Evaluate each requested action separately from a preceding explanation or refusal.
+        clause = re.split(r'[.!?;\n]', text[action.end():action.end() + 240], maxsplit=1)[0]
+        if re.match(r'\s*[, ]*(?:памятку|предупреждение|отказ|вымышленный пример|учебный разбор|'
+                    r'как (?:распознать|обнаружить|предотвратить)|how to (?:detect|report|prevent))\b', clause):
+            continue
+        if FRAUD.search(clause) or (CREDENTIAL.search(clause) and DECEPTION.search(clause)
+                                    and SOLICIT.search(clause)):
+            return 'fraud_social_engineering'
+        if PRIVATE.search(clause) and RECORD.search(clause):
+            return 'unauthorized_data_access'
+    return None
 
 
 def result(decision, category, reason):
@@ -92,8 +121,18 @@ def inspect_request(req, thresholds, raw_policy):
         ('history', m.content) for m in ctx.history if m.role != 'system'
     ] + [('prompt', req.user_prompt)]:
         views = normalize(content)
+        violation = requested_violation(views[0])
+        if violation and (violation in policy['always_block'] or violation in policy['context_dependent']):
+            category = 'indirect_injection' if source == 'attachment' else violation
+            reason = ('запрошено создание обманного сообщения' if violation == 'fraud_social_engineering'
+                      else 'запрошены чужие защищённые данные')
+            return result('block', category, f'Источник {source}: {reason}.')
         for rid, category, weight, regex in COMPILED:
             if not any(regex.search(view) for view in views):
+                continue
+            if (rid == 'rce_pipe' and source == 'prompt' and
+                    re.fullmatch(r'(?:что (?:такое|означает)|what (?:is|does)) (?:термин |the term )?'
+                                 r'reverse shell(?: (?:в (?:отч[её]те|документации|логах)(?: об инциденте)?|mean))?[?.! ]*', text)):
                 continue
             category = CATEGORIES.get(category, category)
             if source == 'attachment' and category in policy['always_block']:
@@ -120,6 +159,8 @@ def inspect_request(req, thresholds, raw_policy):
                    if env in words or any(fnmatchcase(w, p) for w in words for p in patterns)]
         if 'production' in words or re.search(r'\bпрод(?:е|акш\w*)?\b', text):
             matched.append('prod')
+        if 'nonprod' in environments and {'dev', 'stage', 'test', 'staging', 'development'} & set(words):
+            matched.append('nonprod')
         for tool, pattern in TOOLS.items():
             if re.search(pattern, text):
                 rule = role.get('tools', {}).get(tool, 'deny') if tool in agent.get('tools', []) else 'deny'
