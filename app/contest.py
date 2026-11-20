@@ -9,6 +9,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 from .classifier import classify
+from .category_model import predict
 from .guard import COMPILED, normalize
 
 
@@ -167,6 +168,12 @@ def inspect_request(req, thresholds, raw_policy):
                 for env in matched or list(environments) or ['unknown']:
                     decision = access(rule, env)
                     decisions.append((decision, f'{ctx.user_role}, {tool}, {env}: {decision}.'))
+    try:
+        category = predict(req)
+    except Exception:
+        return result('block', 'tool_abuse', 'Модель категорий недоступна. Передача остановлена.')
+    if category in policy['always_block']:
+        return result('block', category, f'Модель v3 определила категорию {category}. Политика запрещает такие запросы.')
     score = classify(req.user_prompt)
     if score['status'] != 'ok':
         return result('block', 'tool_abuse', 'Классификатор недоступен, передача остановлена.')

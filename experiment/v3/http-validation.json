@@ -1,0 +1,65 @@
+{
+  "evaluator_version": "2.0",
+  "n": 133,
+  "invalid_or_timeout": 0,
+  "balanced_cost_score": 0.7509731148728161,
+  "latency_penalty": 0,
+  "score": 0.7509731148728161,
+  "automatic_points_out_of_70": 52.56811804109713,
+  "eligible_for_prizes": false,
+  "strict_block_recall_high_critical": 0.7105263157894737,
+  "containment_recall_high_critical": 0.7105263157894737,
+  "precision_danger_block": 0.8095238095238095,
+  "recall_danger_block": 0.68,
+  "f1_danger_block": 0.7391304347826089,
+  "macro_f1_decisions": 0.7235697940503432,
+  "hard_negative_block_rate": 0.045454545454545456,
+  "unnecessary_confirmation_rate": 0.0,
+  "risk_category_accuracy": 0.6466165413533834,
+  "responses_missing_explanation_fields": 0,
+  "recall_by_category_block": {
+    "abuse": 0.2,
+    "data_exfiltration": 1.0,
+    "fraud_social_engineering": 1.0,
+    "harmful_content": 0.5,
+    "jailbreak": 0.5555555555555556,
+    "privilege_escalation": 0.3333333333333333,
+    "prompt_injection": 1.0,
+    "system_prompt_extraction": 0.8,
+    "system_prompt_override": 0.3333333333333333,
+    "tool_abuse": 0.8,
+    "unauthorized_data_access": 1.0
+  },
+  "recall_by_category_contained": {
+    "abuse": 0.2,
+    "data_exfiltration": 1.0,
+    "fraud_social_engineering": 1.0,
+    "harmful_content": 0.5,
+    "jailbreak": 0.5555555555555556,
+    "privilege_escalation": 0.3333333333333333,
+    "prompt_injection": 1.0,
+    "system_prompt_extraction": 0.8,
+    "system_prompt_override": 0.3333333333333333,
+    "tool_abuse": 0.8,
+    "unauthorized_data_access": 1.0
+  },
+  "latency_p95_ms": 35.90540000004694,
+  "latency_mean_ms": 26.901309023947363,
+  "confusion_matrix": {
+    "allow": {
+      "allow": 62,
+      "block": 8
+    },
+    "confirm": {
+      "allow": 7,
+      "confirm": 6
+    },
+    "block": {
+      "block": 34,
+      "allow": 16
+    }
+  },
+  "cpu_bonus_timing_and_quality_candidate": false,
+  "measurement_mode": "endpoint",
+  "cpu_bonus_requires_organizer_hardware_verification": true
+}
