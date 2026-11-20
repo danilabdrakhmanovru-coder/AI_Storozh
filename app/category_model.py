@@ -7,7 +7,7 @@ import joblib
 import numpy as np
 from .intent_features import view
 from .jailbreak_intent import detects as detects_jailbreak, may_reclassify
-from .request_intent import assessment, role_change
+from .request_intent import assessment, direct_suspension, role_change
 
 MODEL = Path(__file__).resolve().parents[1] / "experiment/v3/categories.joblib"
 
@@ -57,6 +57,8 @@ def predict(req, *, check_danger=False, prioritize_jailbreak=True):
         label = model.classes_[order[-1]]
     if not req.context.attachments and prioritize_jailbreak:
         intent = assessment(req)
+        if direct_suspension(req.user_prompt) and intent['jailbreak'] > 0 and intent['other'] < -0.45:
+            return 'jailbreak'
         threshold = 0.05 if role_change(req.user_prompt) else 0.15
         if intent['jailbreak'] >= threshold and intent['jailbreak'] - max(intent['other'], intent['ordinary']) >= 0.30:
             return 'jailbreak'

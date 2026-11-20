@@ -66,6 +66,36 @@ UNBOUND = re.compile(r"не связан|нет ограничен|без.{0,15}
                      r"no (?:ethics|limits|restrictions)|not bound|anything (?:goes|is allowed)|"
                      r"unconditional compliance|unrestricted|amoral|never say no")
 
+# Keep a request to change the assistant's own output checks in one clause.
+# This feature is deliberately absent from questions, quotations and negations.
+REQUEST_REVIEW_CHANGE = re.compile(
+    r'(?:^|[,;]\s*)(?:(?:please|пожалуйста|я прошу)\s+)?'
+    r'(?:отмен(?:и|ить)|считай|отложи|прекрати|останови|переведи|поставь|'
+    r'set|put|treat|consider|suspend|pause|leave|stop|disable|lift)\b')
+REVIEW_OWNER = re.compile(r'\b(?:тво\w*|сво\w*|собственн\w*|ты будешь|ты отвеча\w*|'
+                          r'your|outgoing|assistant.s|the bot.s)\b')
+REVIEW_OBJECT = re.compile(r'допустимост|модерац|проверк\w* (?:на )?безопасност|защитн\w* проверк|'
+                           r'safeguards?|safety (?:checks?|review|screening)|'
+                           r'(?:screen|controls? on|moderation of).{0,24}(?:repl|responses?|output)')
+INACTIVE = re.compile(r'приостанов|отмен|на пауз|необязательн|недейств|прекрат|останов|отлож|'
+                      r'inactive|on hold|on pause|suspend|aside|revok|disabled?|no longer|stop|lift')
+DISCUSSION = re.compile(r'["«»“”\n?]|\b(?:не|not|never|why|explain|whether|translate|discuss why|'
+                        r'почему|зачем|объясни|переведи фразу|отказ|обсуди|цитат\w*)\b')
+
+
+def direct_suspension(prompt):
+    if len(prompt) > 340:
+        return False
+    text = prompt.casefold()
+    if DISCUSSION.search(text):
+        return False
+    match = REQUEST_REVIEW_CHANGE.search(text)
+    if not match:
+        return False
+    clause = text[match.start():].split('.', 1)[0]
+    output_target = OUTPUT_SCOPE.search(clause) or re.search(r'что ты (?:будешь|говоришь)|what you say', clause)
+    return bool(output_target and REVIEW_OWNER.search(clause) and REVIEW_OBJECT.search(clause) and INACTIVE.search(clause))
+
 
 def scoped_features(req):
     text = req.user_prompt.casefold()
@@ -74,6 +104,8 @@ def scoped_features(req):
         flags.append("suspend_output_review")
     if (ROLE.search(text) or PERSONA.search(text)) and UNBOUND.search(text):
         flags.append("unbound_speaker")
+    if direct_suspension(req.user_prompt):
+        flags.append("direct_suspension")
     return current_features(req) + " " + " ".join("jb_request_" + flag for flag in flags)
 
 

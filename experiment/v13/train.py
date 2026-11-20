@@ -36,7 +36,7 @@ if __name__ == "__main__":
                 rows.append({**row, "user_prompt": original[field].strip()})
     assert len(feedback) == 16
     rows.extend(feedback)
-    withheld = source_texts(evaluation())
+    withheld = source_texts(evaluation()) | source_texts(evaluation("final"))
     if source_texts(rows) & withheld:
         raise ValueError("A held-out prompt occurs in training context")
     fit(rows, scoped_features, OUT / "intent.joblib", withheld)

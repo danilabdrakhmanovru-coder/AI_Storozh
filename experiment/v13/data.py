@@ -9,8 +9,12 @@ JAILBREAK = """7242 2867 54 5431 7707 7226 4864 7153 4784 2423 3245 1463 214 784
 4758 2354 5057 7485 3313 6757 5126 832 1997 13 2688 2033 2946 1424"""
 
 
-def evaluation():
-    rows = sector_rows(OUT / "sectors.txt")
+FINAL_JB = """4125 7064 2292 219 1105 1010 7731 5354 3002 7012 3784 392 5063 4263 6050"""
+
+
+def evaluation(part="new"):
+    final = part == "final"
+    rows = sector_rows(OUT / ("final-sectors.txt" if final else "sectors.txt"))
     for n, row in enumerate(rows):
         prompt = row["user_prompt"]
         if n % 6 == 1:
@@ -23,9 +27,11 @@ def evaluation():
     old = {int(i) for line in (OUT.parent / "v11/labels.txt").read_text().splitlines()
            for i in line.split("|")[1].split()}
     old.update(map(int, EXTERNAL_JB.split()))
-    jb = list(map(int, JAILBREAK.split()))
+    if final:
+        old.update(map(int, JAILBREAK.split()))
+    jb = list(map(int, (FINAL_JB if final else JAILBREAK).split()))
     assert set(jb) <= set(attacks) - old
-    for group, ids in [("ordinary", safe[1500:1750]), ("jailbreak", jb)]:
+    for group, ids in [("ordinary", safe[2350:2600] if final else safe[1500:1750]), ("jailbreak", jb)]:
         for n, i in enumerate(ids):
             prompt = corpus[i]["translation" if n % 2 else "text"].strip()
             row = make_row(f"external-{i}", group, prompt)
