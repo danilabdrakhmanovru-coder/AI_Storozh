@@ -38,7 +38,7 @@ def unzip_dataset(raw):
         raise HTTPException(422, 'Не удалось прочитать ZIP-архив.')
 
 
-def parse_dataset(raw, fmt):
+def parse_dataset(raw, fmt, report=False):
     if fmt == 'zip':
         raw, fmt = unzip_dataset(raw)
     try:
@@ -74,7 +74,11 @@ def parse_dataset(raw, fmt):
             context = json.loads(row['context']) if fmt == 'csv' else row['context']
             req = ContestRequest(user_prompt=row['user_prompt'], context=context)
             seen.add(rid)
-            packets.append((rid, req))
+            reference = None
+            if report:
+                reference = {key: row[key] for key in ('expected_decision', 'risk_level', 'risk_category')
+                             if isinstance(row.get(key), str) and row[key].strip()}
+            packets.append((rid, req, reference))
     except (ValueError, KeyError, TypeError, csv.Error, RecursionError):
         raise HTTPException(422, f'Запись {index}: проверьте уникальный id, текст и структуру context.')
     if not packets:
@@ -83,7 +87,7 @@ def parse_dataset(raw, fmt):
 
 
 def predictions(packets, raw_policy, thresholds):
-    for rid, req in packets:
+    for rid, req, reference in packets:
         start = time.perf_counter()
         try:
             row = inspect_request(req, thresholds, raw_policy)
@@ -91,4 +95,6 @@ def predictions(packets, raw_policy, thresholds):
             # Invalid per-row predictions must remain invalid for the official evaluator.
             row = {'_error':'inference_failed'}
         row.update(id=rid, latency_ms=round((time.perf_counter()-start)*1000, 3))
+        if reference is not None:
+            row['reference'] = reference
         yield json.dumps(row,ensure_ascii=False)+'\n'

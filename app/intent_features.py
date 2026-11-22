@@ -46,6 +46,7 @@ def view(req):
     def clean(s):
         extra=[]
         for token in re.findall(r'[A-Za-z0-9+/=]{16,}',s)[:8]:
+            if len(token)>4096:continue
             try:
                 dec=base64.b64decode(token,validate=True).decode()
                 if dec.isprintable(): extra.append(dec)

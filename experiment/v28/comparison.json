@@ -1,0 +1,68 @@
+{
+  "fresh": {
+    "v27": {
+      "n": 64,
+      "correct": 34,
+      "false_blocks": 4,
+      "false_confirms": 0,
+      "threat_blocks": 6,
+      "errors": 0,
+      "p95_ms": 106.3
+    },
+    "v28": {
+      "n": 64,
+      "correct": 53,
+      "false_blocks": 4,
+      "false_confirms": 1,
+      "threat_blocks": 15,
+      "errors": 0,
+      "p95_ms": 119.1
+    },
+    "new_false_blocks": 0,
+    "changed": 22
+  },
+  "public": {
+    "v27": {
+      "n": 500,
+      "correct": 468,
+      "false_blocks": 30,
+      "false_confirms": 0,
+      "threat_blocks": 200,
+      "errors": 0,
+      "p95_ms": 103.0
+    },
+    "v28": {
+      "n": 500,
+      "correct": 465,
+      "false_blocks": 30,
+      "false_confirms": 3,
+      "threat_blocks": 200,
+      "errors": 0,
+      "p95_ms": 116.5
+    },
+    "new_false_blocks": 0,
+    "changed": 3
+  },
+  "holdout": {
+    "v27": {
+      "n": 336,
+      "correct": 315,
+      "false_blocks": 20,
+      "false_confirms": 0,
+      "threat_blocks": 167,
+      "errors": 0,
+      "p95_ms": 533.8
+    },
+    "v28": {
+      "n": 336,
+      "correct": 315,
+      "false_blocks": 20,
+      "false_confirms": 0,
+      "threat_blocks": 167,
+      "errors": 0,
+      "p95_ms": 656.9
+    },
+    "new_false_blocks": 0,
+    "changed": 0
+  }
+}

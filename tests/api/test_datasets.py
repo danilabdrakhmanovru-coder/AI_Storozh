@@ -69,12 +69,26 @@ class DatasetTests(unittest.TestCase):
         self.assertEqual(self.send(data,key='wrong').status_code,401)
         self.assertEqual(self.client.get('/policy',headers={'X-API-Key':'jury'}).status_code,401)
 
+    def test_reference_is_opt_in_and_independent_of_prediction(self):
+        row = {**self.row,'expected_decision':'block','risk_category':'jailbreak','risk_level':'low'}
+        data = json.dumps(row).encode()
+        plain = self.send(data).json()
+        self.assertNotIn('reference',plain)
+        result = self.client.post('/v1/datasets/check?report=true',content=data,
+                                  headers={'X-API-Key':'jury'}).json()
+        self.assertEqual(result['reference'],{key: row[key] for key in ('expected_decision','risk_category','risk_level')})
+        self.assertEqual(result['decision'],plain['decision'])
+        self.assertEqual(result['decision'],'confirm')
+
     def test_row_failure_is_not_a_successful_block(self):
         with patch('app.contest.predict',side_effect=RuntimeError()):
             data=self.send(json.dumps(self.row).encode()).json()
             self.assertEqual(data['_error'],'inference_failed')
             self.assertNotIn('decision',data)
-            self.assertEqual(self.client.post('/v1/check',json=self.row,headers={'X-API-Key':'operator'}).status_code,503)
+            reply=self.client.post('/v1/check',json=self.row,headers={'X-API-Key':'operator'})
+            self.assertEqual(reply.status_code,200)
+            self.assertEqual(reply.json()['decision'],'block')
+            self.assertTrue(reply.json()['check_error'])
 
 
 if __name__=='__main__':

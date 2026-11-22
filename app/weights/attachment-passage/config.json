@@ -1,0 +1,16 @@
+{
+  "top_k": 8,
+  "threshold": 0.7546702392032686,
+  "supported": 0.7546702392032686,
+  "linear": 0.43536301032743285,
+  "neural": 0.0,
+  "prior": 0.0,
+  "quote_penalty": 1.0,
+  "rescue": {
+    "linear": 0.0,
+    "neural": 0.3333333333333333,
+    "prior": 0.0,
+    "quote_penalty": 0.5,
+    "threshold": 1.5547619660695393
+  }
+}

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Политика · ИИ-сторож</title><link rel="stylesheet" href="/static/agent-test.css"></head>
+<body><header><div class="bar"><span class="brand">ИИ-сторож</span><a href="/">Проверка инструкции</a></div></header>
+<main><h1>Политика доступа</h1><section class="panel"><label for="key">Ключ оператора</label><input type="password" id="key" autocomplete="off">
+<button class="secondary" id="load">Открыть политику</button><p role="status" id="status"></p>
+<div id="editor" hidden><h2>Полномочия</h2><div class="scroll"><table><thead><tr><th>Агент</th><th>Роль</th><th>Инструмент</th><th>Доступ по окружениям</th></tr></thead><tbody id="matrix"></tbody></table></div>
+<label for="yaml">Действующая политика YAML</label><textarea id="yaml" rows="18" spellcheck="false"></textarea><button class="primary" id="apply">Проверить и применить</button></div></section></main>
+<script>
+const el=id=>document.getElementById(id);let version='';
+async function request(path,data){const headers={'Content-Type':'application/json'};if(el('key').value)headers['X-API-Key']=el('key').value;
+ const res=await fetch(path,data?{method:'POST',headers,body:JSON.stringify(data)}:{headers});const body=await res.json();if(!res.ok)throw Error(body.detail||'Ошибка загрузки');return body;}
+async function load(){const data=await request('/v1/policy');version=data.version;el('yaml').value=data.yaml_text;el('editor').hidden=false;
+ el('status').textContent='Версия '+version.slice(0,12)+(data.changed?' · '+data.changed.author+' · '+new Date(data.changed.ts*1000).toLocaleString('ru'):'');
+ el('matrix').replaceChildren();for(const [agent,roles] of Object.entries(data.agents))for(const [role,rights] of Object.entries(roles))for(const [tool,rule] of Object.entries(rights.tools)){
+ const row=el('matrix').insertRow();for(const s of [agent,role,tool,typeof rule==='string'?rule:Object.entries(rule).map(([e,d])=>e+' → '+d).join(' · ')])row.insertCell().textContent=s;}}
+async function action(button,fn){button.disabled=true;try{await fn();}catch(e){el('status').textContent=e.message;}finally{button.disabled=false;}}
+el('load').onclick=e=>action(e.target,load);el('apply').onclick=e=>action(e.target,async()=>{await request('/policy/reload',{version,yaml_text:el('yaml').value});await load();});action(el('load'),load);
+</script></body></html>
+

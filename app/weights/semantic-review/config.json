@@ -1,0 +1,13 @@
+{
+  "architecture": "stack",
+  "nli": false,
+  "semantic_weight": 1.0,
+  "positive": 0.58,
+  "negative": 0.45,
+  "C": 0.2,
+  "cv_accuracy": 0.823076923076923,
+  "cv_fp": 21,
+  "cv_misses": 25,
+  "project_fp": 7,
+  "project_misses": 1
+}

@@ -1,0 +1,22 @@
+{
+  "training": {
+    "draft": 104,
+    "confirm": 156,
+    "fraud": 122,
+    "other": 175
+  },
+  "development": {
+    "draft/draft": 8,
+    "confirm/confirm": 8,
+    "fraud/fraud": 8,
+    "other/other": 12
+  },
+  "config": {
+    "semantic_weight": 0.45,
+    "min_attribution": -0.45,
+    "fast_other": 0.75,
+    "fraud_margin": 0.15
+  },
+  "model_sha256": "3edddc7fdbca226c33c9fe0760bba5a63a12b3132a696c058775db9818272377",
+  "training_sha256": "9f66542d805307221e44e74b0de26aec6fc1896510ef20c7bc8884b91570db9b"
+}

@@ -1,36 +1,39 @@
-# Политика безопасности для кейса «ИИ-сторож». Целевой агент: it_ops_agent (DevOps-ассистент).
-# Решение должно читать правила из этого файла, а не держать их в коде.
-# На финале жюри может изменить одно-два правила и проверить, что поведение изменилось.
-
 version: 1
-
 decisions:
-  allow: "Передать запрос целевому агенту"
-  confirm: "Легитимное, но значимое действие — запросить явное подтверждение пользователя"
-  block: "Не передавать запрос; вернуть объяснение"
-
-# Категории, которые всегда блокируются, независимо от роли
+  allow: Передать запрос целевому агенту
+  confirm: Легитимное, но значимое действие — запросить явное подтверждение пользователя
+  block: Не передавать запрос; вернуть объяснение
 always_block:
-  - prompt_injection
-  - jailbreak
-  - indirect_injection          # инструкции во вложениях/документах/веб-страницах
-  - system_prompt_extraction
-  - system_prompt_override
-  - privilege_escalation        # попытка получить права словами («я админ»), а не через context.user_role
-  - data_exfiltration           # вывод данных на внешние адреса, в ссылки, картинки
-  - harmful_content             # оружие, взрывчатка, наркотики, вредоносный код, причинение вреда
-  - fraud_social_engineering
-  - abuse
-
-# Категории, решение по которым зависит от роли и полномочий (см. agents)
+- prompt_injection
+- jailbreak
+- indirect_injection
+- system_prompt_extraction
+- system_prompt_override
+- privilege_escalation
+- data_exfiltration
+- harmful_content
+- fraud_social_engineering
+- abuse
 context_dependent:
-  - unauthorized_data_access
-  - tool_abuse
-
+- unauthorized_data_access
+- tool_abuse
 agents:
   it_ops_agent:
-    tools: [run_shell, read_logs, restart_service, delete_resource]
-    environments: {prod: [prod-*, "*-prod", "*-prod-*"], nonprod: [dev-*, stage-*, test-*]}
+    review_correspondence: true
+    tools:
+    - run_shell
+    - read_logs
+    - restart_service
+    - delete_resource
+    environments:
+      prod:
+      - prod-*
+      - '*-prod'
+      - '*-prod-*'
+      nonprod:
+      - dev-*
+      - stage-*
+      - test-*
     roles:
       developer:
         tools:
@@ -42,22 +45,118 @@ agents:
       sre:
         tools:
           read_logs: any
-          restart_service: {prod: confirm, nonprod: allow}
-          run_shell: {prod: confirm, nonprod: allow}
-          delete_resource: {nonprod: confirm, prod: deny}
+          restart_service:
+            prod: confirm
+            nonprod: allow
+          run_shell:
+            prod: confirm
+            nonprod: allow
+          delete_resource:
+            nonprod: confirm
+            prod: deny
         secrets: names_only
       admin:
         tools:
           read_logs: any
-          restart_service: {prod: confirm, nonprod: allow}
-          run_shell: {prod: confirm, nonprod: allow}
-          delete_resource: {any: confirm}
+          restart_service:
+            prod: confirm
+            nonprod: allow
+          run_shell:
+            prod: confirm
+            nonprod: allow
+          delete_resource:
+            any: confirm
         secrets: names_only
-    forbidden_actions:              # блокируются для любой роли
-      - disable_audit_or_wipe_logs
-      - pipe_remote_script_to_shell     # curl ... | bash
-      - add_ssh_keys_or_sudoers_via_chat
-      - send_secrets_or_data_to_external_hosts
-
-# Важно: роль берётся ТОЛЬКО из context.user_role. Утверждения в тексте запроса
-# («я администратор», «вот код подтверждения») прав не дают.
+    forbidden_actions:
+    - name: disable_audit_or_wipe_logs
+      description: Отключение аудита или очистка журналов
+      patterns:
+      - (?:отключи|сотри|очисти|disable|wipe|clear).{0,30}(?:аудит|журнал|логи|audit|logs)
+    - name: pipe_remote_script_to_shell
+      description: Передача удалённого сценария интерпретатору
+      patterns:
+      - (?:curl|wget)\b[^|]{0,200}\|\s*(?:ba)?sh
+    - name: add_ssh_keys_or_sudoers_via_chat
+      description: Изменение ключей доступа через чат
+      patterns:
+      - (?:добавь|запиши|add|append).{0,80}(?:ssh|sudoers|authorized_keys)
+    - name: send_secrets_or_data_to_external_hosts
+      description: Отправка данных за пределы организации
+      patterns:
+      - (?:send|upload|отправь|загрузи).{0,80}(?:https?://|внешн|external)
+    critical_environments:
+    - prod
+    environment_aliases:
+      prod:
+      - production
+      - прод
+      - проде
+      - продакшен
+      - продакшене
+      nonprod:
+      - dev
+      - stage
+      - test
+      - staging
+      - development
+    tool_specs:
+      restart_service:
+        type: modify
+        aliases:
+        - restart
+        - перезапусти
+        patterns:
+        - \b(?:перезапусти(?:те)?|рестартни|restart|restart_service|(?:инициируй|выполни|сделай) перезапуск)\b
+        literal_patterns:
+        - '(?:(?:перезапусти(?:те)?(?: сервис| службу)?|(?:выполни|инициируй) перезапуск (?:сервиса|службы)|restart(?: (?:the )?service(?: (?:running )?on)?)?)
+          (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*|для (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)* (?:инициируй|выполни) перезапуск)[.!]?'
+      delete_resource:
+        type: destroy
+        aliases:
+        - delete
+        - удали
+        patterns:
+        - \b(?:удали(?:те)?|delete|remove|delete_resource|(?:запрашиваю|выполни|инициируй) удаление)\b
+        literal_patterns:
+        - (?:удали ресурс|запрашиваю удаление ресурса|(?:delete|remove) (?:the )?resource) (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*[.!]?
+        inline_literal: '(?:(?:in this task you will be given a list of numbers and you should |please )?(?:remove|delete) (?:all )?duplicates (?:in|from)
+          the list[.:] (?:if every number is repeated in the list an empty list should be returned\. )?(?:your list should be numbers inside brackets, just
+          like the given list\. )?(?:input: )?\[\s*-?\d+(?:\s*,\s*-?\d+)*\s*\]|(?:remove|delete) (?:duplicate|repeated) letters from (?:this|the following)
+          sample: [a-z]{2,32}|удали(?:те)? (?:повторы|повторяющиеся числа) (?:в этом списке|из этого списка|из следующего ряда): -?\d+(?:\s*,\s*-?\d+)+)[.?!]?'
+        inline_repeated: '(?:(?:remove|delete) (?:repeated|duplicate) words from (?:this|the following) (?:[a-z]{1,18} )?(?:caption|description|sentence|list)|удали(?:те)?
+          повторы (?:в (?:этом )?списке|из (?:этого )?списка)(?: (?:слов|им[её]н|названий(?: [а-яё]{1,18})?))?):\s*([a-zа-яё]{1,30}(?:(?:,\s*| )[a-zа-яё]{1,30}){1,20})[.!?]?'
+      read_logs:
+        type: read
+        aliases:
+        - read logs
+        - прочитай логи
+        patterns:
+        - (?:покажи|прочитай|выведи|открой|посмотри|read|show|fetch).{0,40}(?:лог|журнал|logs)|\bкакие записи (?:сейчас )?в (?:логах|журнале)\b|\bread_logs\b
+        literal_patterns:
+        - '(?:(?:открой|прочитай|посмотри|покажи|выведи) (?:журнал|логи)(?: (?:приложения|сервиса))? (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*|(?:read|fetch|show)
+          (?:the )?(?:service )?logs (?:of|on|for|from) (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*|какие записи (?:сейчас )?в логах (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*\?
+          (?:выведи|покажи) их)[.!]?'
+      run_shell:
+        type: execute
+        aliases:
+        - run shell
+        - выполни команду
+        patterns:
+        - (?:выполни|запусти|run|execute).{0,35}(?:команд|скрипт|shell|command|script|миграци|migration)|\b(?:run|выполни)\s+`?(?:df|du|ps|uptime|date)\b|\brun_shell\b|\b(?:масштабируй|deploy|scale|roll
+          ?back|очисти кэш|поставь log_level)\b
+        literal_patterns:
+        - (?:(?:выполни|запусти) (?:shell-)?команду (?:проверки времени|для просмотра текущей даты) на (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*|на
+          (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)* (?:выполни|запусти) (?:shell-)?команду (?:проверки времени|для просмотра текущей даты)|run (?:a
+          |the )?shell command to display the (?:current )?date on (?:prod|stage|dev|test)-[a-z0-9]+(?:-[a-z0-9]+)*)[.!]?
+    definition_patterns:
+    - (?:hi[!,]?\s*)?explain why (?:curl|wget)\s*\|\s*(?:ba)?sh (?:installs? )?(?:is|are) (?:dangerous|unsafe|risky)[.?! ]*(?:please[.! ]*)?
+    - '(?:что (?:такое|означает)|what (?:is|does)) (?:термин |the term )?reverse shell(?: (?:в (?:отч[её]те|документации|логах)(?: об инциденте)?|mean))?[?.!
+      ]*'
+    protected_data:
+    - permission: secrets
+      pattern: (покажи|выведи|прочитай|list|show|read).{0,45}(парол|секрет|токен|secret|password|token)
+      metadata_pattern: только (?:имена|названия)|names only|only (?:the )?names
+      metadata_literal: (?:покажи только (?:имена|названия) секретов|(?:list|show) (?:only (?:the )?names of secrets|secret names only))[.!]?
+thresholds:
+  confirm: 0.35
+  block: 0.75

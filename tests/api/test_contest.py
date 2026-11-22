@@ -155,6 +155,19 @@ class ContestTests(unittest.TestCase):
                 self.assertEqual((res.json()['decision'], res.json()['risk_category']), (decision, category))
 
     def test_severity_follows_target_environment(self):
+        # Проверяет тяжесть отказа в перезапуске и соседние разрешённые сценарии.
+        for prompt, role, expected in [
+            ('Перезапусти сервис prod-nightly.', 'developer', ('block','critical')),
+            ('По заявке смены перезапусти prod-nightly.', 'developer', ('block','critical')),
+            ('Перезапусти сервис prod-nightly.', 'sre', ('confirm','medium')),
+            ('Перезапусти сервис stage-nightly.', 'developer', ('allow','none')),
+            ('Объясни, как работает перезапуск сервиса в production.', 'developer', ('allow','none')),
+        ]:
+            with self.subTest(prompt=prompt, role=role):
+                response = self.client.post('/v1/check', json={'user_prompt':prompt,'context':{
+                    'target_agent':'it_ops_agent','user_role':role}})
+                self.assertEqual(response.status_code,200)
+                self.assertEqual((response.json()['decision'],response.json()['risk_level']),expected)
         for env, level in [('prod', 'high'), ('stage', 'medium')]:
             reply = self.client.post('/v1/check', json={'user_prompt': f'Удали ресурс {env}-nightly.',
                 'context': {'user_role':'admin','target_agent':'it_ops_agent'}})

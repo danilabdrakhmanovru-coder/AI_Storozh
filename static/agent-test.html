@@ -7,29 +7,29 @@
   <link rel="stylesheet" href="/static/agent-test.css">
 </head>
 <body>
-<header><div class="bar"><span class="brand"><span class="mark" aria-hidden="true">✓</span>ИИ-сторож</span><code>POST /v1/check</code></div></header>
+<header><div class="bar"><span class="brand"><span class="mark" aria-hidden="true">✓</span>ИИ-сторож</span><nav><a href="#journal-title">Журнал</a> · <a href="/static/contest-policy.html">Политика</a></nav></div></header>
 <main>
   <h1>Проверка инструкции</h1>
   <div class="grid">
   <form class="panel" id="form">
     <h2>Запрос к агенту</h2>
-    <label for="scenario">Пример для проверки</label>
-    <select id="scenario"><option value="block">Перезапуск · разработчик</option><option value="confirm">Перезапуск · SRE</option><option value="allow">Вопрос о перезапуске · разработчик</option></select>
+    <details id="example-panel"><summary>Готовые примеры</summary><div class="chips" id="examples"></div></details>
     <label for="prompt">Инструкция</label>
-    <textarea id="prompt" rows="3" maxlength="32000" required>Перезапусти payments-api в production.</textarea>
+    <textarea id="prompt" rows="3" maxlength="32000" aria-describedby="prompt-evidence" required></textarea><div id="prompt-evidence" class="source-evidence"></div>
     <label for="role">Роль пользователя</label>
     <select id="role"><option>developer</option><option>sre</option><option>admin</option></select>
-    <details><summary>Контекст и доступ</summary>
+    <small id="env-hint"></small><details><summary>История, вложения и доступ</summary>
       <label for="agent">Целевой агент</label><input id="agent" value="it_ops_agent" required>
-      <label for="history">История сообщений · JSON</label><textarea id="history" rows="2">[]</textarea>
-      <label for="attachments">Вложения · JSON</label><textarea id="attachments" rows="2">[]</textarea>
+      <fieldset><legend>История диалога</legend><div id="messages"></div><button class="secondary" type="button" id="add-message">Добавить реплику</button></fieldset>
+      <fieldset><legend>Вложения</legend><div id="documents"></div><button class="secondary" type="button" id="add-doc">Добавить вложение</button></fieldset>
       <label for="key">Ключ API, если требуется</label><input id="key" type="password" autocomplete="off">
     </details>
     <button class="primary" id="submit">Проверить</button>
   </form>
   <section class="panel verdict" aria-live="polite"><h2>Решение сторожа</h2>
-    <div class="display" id="display"><small id="signal">Ожидание</small><strong id="headline">Запрос готов к проверке</strong></div>
-    <p id="summary">Выберите пример или введите свою инструкцию.</p>
+    <div class="display" id="display"><small id="signal">Ожидание</small><strong id="headline">Введите инструкцию</strong></div>
+    <p id="summary"></p><meter id="risk-meter" min="0" max="4" value="0" aria-label="Уровень риска" hidden></meter>
+    <p id="category"></p><details id="trace" hidden><summary>Что сработало</summary><p id="act"></p><div id="marks"></div></details>
     <button type="button" id="confirm" class="primary" hidden>Подтвердить этот запрос</button>
     <button type="button" id="deliver" class="primary" hidden>Передать демо-агенту</button>
     <p id="receipt"></p>
@@ -40,48 +40,44 @@
     <form id="dataset-form">
       <label for="dataset-file">Датасет организаторов · JSONL, CSV или ZIP</label>
       <input id="dataset-file" type="file" accept=".jsonl,.csv,.zip" required>
-      <label for="dataset-key">Ключ проверяющего, если требуется</label>
-      <input id="dataset-key" type="password" autocomplete="off">
+      <details><summary>Доступ к закрытому стенду</summary>
+        <label for="dataset-key">Ключ проверяющего</label><input id="dataset-key" type="password" autocomplete="off">
+      </details>
       <p>До 10 000 запросов и 32 МиБ. Для проверки достаточно id, user_prompt и context.</p>
       <button class="primary" id="dataset-start">Проверить файл</button>
     </form>
     <p role="status" id="dataset-status"></p>
-    <a class="secondary" id="dataset-download" download="predictions.jsonl" hidden>Скачать решения JSONL</a>
+    <div id="dataset-summary"></div>
+    <a class="secondary" id="dataset-report" download="Отчёт ИИ-сторож.html" hidden>Скачать отчёт HTML</a>
+    <a class="secondary" id="dataset-download" download="predictions.jsonl" hidden>Решения для оценивания · JSONL</a>
   </section>
-  <details class="panel log"><summary>Журнал последних проверок</summary>
-    <button type="button" class="secondary" id="refresh">Обновить</button><pre id="journal"></pre></details>
+  <section class="panel log"><h2 id="journal-title">Журнал проверок</h2>
+    <div class="filters"><label>Решение<select id="filter-decision"><option value="">Все</option><option value="allow">Пропуск</option><option value="confirm">Подтверждение</option><option value="block">Блокировка</option></select></label>
+    <label>Категория<input id="filter-category" placeholder="Например, jailbreak"></label><label>Роль<input id="filter-role"></label>
+    <label>С<input id="filter-since" type="datetime-local"></label><label>По<input id="filter-until" type="datetime-local"></label></div>
+    <button type="button" class="secondary" id="refresh">Обновить журнал</button><p id="journal-status" role="status"></p>
+    <div class="scroll"><table><thead><tr><th>Время</th><th>Роль</th><th>Решение</th><th>Категория</th><th>Задержка</th><th>Политика</th></tr></thead><tbody id="journal"></tbody></table></div></section>
 </main>
 <script>
 const field = id => document.getElementById(id);
-function readList(id, label) {
-  try {
-    const value = JSON.parse(field(id).value);
-    if (Array.isArray(value)) return value;
-  } catch {}
-  throw new Error('Поле «' + label + '» должно содержать JSON-массив.');
-}
 let checked = null;
 let revision = 0;
 function reset() {
   revision++;
+  document.querySelectorAll('.source-evidence').forEach(n=>n.replaceChildren());
+  document.querySelectorAll('.flagged-input').forEach(n=>n.classList.remove('flagged-input'));
+  document.getElementById('role-comparison')?.replaceChildren();
   checked = null;
   field('confirm').hidden = field('deliver').hidden = true;
   field('receipt').textContent = '';
-  field('raw').hidden = true;
+  field('raw').hidden = field('trace').hidden = field('risk-meter').hidden = true;
+  field('category').textContent = '';
   field('display').dataset.state = '';
   field('signal').textContent = 'Ожидание';
   field('headline').textContent = 'Запрос готов к проверке';
   field('summary').textContent = 'Нажмите «Проверить», чтобы получить решение.';
 }
 field('form').addEventListener('input', reset);
-field('scenario').onchange = () => {
-  reset();
-  const example = field('scenario').value;
-  field('role').value = example === 'confirm' ? 'sre' : 'developer';
-  field('prompt').value = example === 'allow' ? 'Объясни, как работает перезапуск сервиса в production.' : 'Перезапусти payments-api в production.';
-  field('agent').value = 'it_ops_agent';
-  field('history').value = field('attachments').value = '[]';
-};
 async function api(path, body) {
   const headers = {'Content-Type':'application/json'};
   if (field('key').value) headers['X-API-Key'] = field('key').value;
@@ -92,12 +88,19 @@ async function api(path, body) {
 }
 async function journal() {
   try {
-    const rows = await api('/v1/demo/journal');
-    field('journal').textContent = rows.map(r =>
-      new Date(r.ts*1000).toLocaleString() + ' · ' + r.role + ' · ' + r.decision + ' · ' + r.category +
-      ' · ' + r.latency_ms + ' мс · ' + r.state + '\n' + r.id + ' · политика ' + r.policy_version.slice(0,12)
-    ).join('\n\n') || 'Проверок пока нет.';
-  } catch (err) { field('journal').textContent = err.message; }
+    const params=new URLSearchParams();
+    for(const name of ['role','category','decision','since','until']){
+      const value=field('filter-'+name).value;
+      if(value)params.set(name,['since','until'].includes(name)?Date.parse(value)/1000:value);
+    }
+    const rows=await api('/v1/demo/journal?'+params);
+    field('journal').replaceChildren();
+    for(const r of rows){
+      const row=field('journal').insertRow();
+      for(const value of [new Date(r.ts*1000).toLocaleString('ru'),r.role,decisions[r.decision],r.category,r.latency_ms+' мс',r.policy_version.slice(0,12)])row.insertCell().textContent=value;
+    }
+    field('journal-status').textContent=rows.length ? '' : 'Проверок с такими условиями пока нет.';
+  } catch(err){field('journal-status').textContent=err.message;}
 }
 field('refresh').onclick = journal;
 field('form').onsubmit = async event => {
@@ -110,7 +113,7 @@ field('form').onsubmit = async event => {
   try {
     const body = {user_prompt:field('prompt').value, context:{
       target_agent:field('agent').value.trim(), user_role:field('role').value,
-      history:readList('history','История сообщений'), attachments:readList('attachments','Вложения')
+      history:items('messages'), attachments:items('documents')
     }};
     const data = await api('/v1/check', body);
     if (revision !== current) return;
@@ -119,6 +122,7 @@ field('form').onsubmit = async event => {
     field('signal').textContent = data.decision + ' · ' + data.latency_ms + ' мс';
     field('headline').textContent = {allow:'Передача разрешена',confirm:'Нужно подтверждение',block:'Запрос заблокирован'}[data.decision];
     field('summary').textContent = data.explanation + ' Уровень риска: ' + ({none:'отсутствует',low:'низкий',medium:'средний',high:'высокий',critical:'критический'}[data.risk_level] || data.risk_level) + '.';
+    renderTrace(data,body);
     field('raw').hidden = false;
     field('output').textContent = JSON.stringify(data,null,2);
     field('receipt').textContent = 'Демо-агент ничего не получил.';
@@ -150,8 +154,8 @@ for (const action of ['confirm','deliver']) {
     await journal();
   };
 }
-journal();
 </script>
+<script src="/static/contest-demo.js"></script>
 <script src="/static/dataset.js" defer></script>
 </body>
 </html>

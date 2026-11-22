@@ -1,0 +1,9 @@
+{
+  "app/contest.py": "066c27eb64e3e201c7c568b3352a9e95790c89407658aaab9568e465927946c8",
+  "app/contest_policy.py": "a84a39bc10e96d5190f9c6fbddbf44987f8e5bb8c787af5ff4f2527e836a3496",
+  "app/correspondence.py": "05e1106b07a580feecbe814c31c8df2866e1734c38c0dfb5951f28a17f64ab16",
+  "security_policy.yaml": "b3c8b8369c1cf65665f4f4ce9d308177d1ae5ecb89f2242977ec381b350985af",
+  "app/weights/correspondence.joblib": "3edddc7fdbca226c33c9fe0760bba5a63a12b3132a696c058775db9818272377",
+  "experiment/v28/holdout.jsonl": "15e891fa3632fd58cea3a14d1ea58b2eb78b0f841caa6cceac81fc8b197c7bab",
+  "experiment/v28/evaluate.py": "5d4cf6c5fc6890dfeadd083ecc0001cb11ac5f02e26879b1e3f57015be3641d3"
+}

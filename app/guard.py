@@ -16,17 +16,23 @@ def normalize(text: str) -> list[str]:
     t = re.sub(r"\s+", " ", t)
     views = [t, t.translate(HOMOGLYPHS), t.translate(HOMOGLYPHS_RU), t.translate(LEET),
              re.sub(r"(?<=\b\w)[\s.\-_*|](?=\w\b)", "", t)]      # «i g n o r e», «и.г.н.о.р.и.р.у.й»
-    if "%" in t:
-        views.append(urllib.parse.unquote(t))
+    # Decode data once; limit each transform and never evaluate its contents.
+    if "%" in text:
+        views.append(urllib.parse.unquote(text[:32768]).casefold())
     views.append(codecs.decode(t, "rot13"))
-    for chunk in re.findall(r"[A-Za-z0-9+/=]{16,}", text):
+    tokens = re.finditer(r"[A-Za-z0-9+/=]{12,}",text)
+    for idx, match in enumerate(tokens):
+        if idx>=16:break
+        token=match.group()
+        if len(token)>4096:continue
         try:
-            dec = base64.b64decode(chunk + "=" * (-len(chunk) % 4), validate=False).decode("utf-8")
-            if dec.isprintable():
-                views.append(dec.lower())
-        except Exception:
-            pass
-    return views
+            raw=bytes.fromhex(token) if len(token)%2==0 and re.fullmatch(r"[a-fA-F0-9]+",token) else base64.b64decode(token+"="*(-len(token)%4),validate=True)
+            decoded=raw.decode("utf-8")
+            if decoded.strip() and all(c.isprintable() or c.isspace() for c in decoded):
+                views.append(unicodedata.normalize("NFKC",decoded).translate(ZERO_WIDTH).casefold())
+        except (ValueError,UnicodeError):
+            continue
+    return list(dict.fromkeys(views))
 
 
 # (id, category, weight, regex)

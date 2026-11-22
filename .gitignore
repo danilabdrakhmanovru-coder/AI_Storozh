@@ -3,7 +3,12 @@ __pycache__/
 .venv/
 audit.db*
 .env
-artifacts/
+artifacts/*
+!artifacts/AI-Storozh-v18-CPU.zip
+!artifacts/astra_public/
+artifacts/astra_public/*
+!artifacts/astra_public/evaluate.py
+!artifacts/astra_public/dev.jsonl
 
 # Downloaded benchmark data (restored by experiment/external/run.py)
 experiment/external/benchmark*.csv

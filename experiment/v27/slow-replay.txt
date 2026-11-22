@@ -1,0 +1,74 @@
+uncovered
+allow
+         6878732 function calls (6877390 primitive calls) in 7.412 seconds
+
+   Ordered by: cumulative time
+   List reduced from 891 to 27 due to restriction <27>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    7.414    7.414 profile_replay.py:17(call)
+        1    0.000    0.000    7.413    7.413 contest.py:123(inspect_request)
+        1    0.000    0.000    6.523    6.523 contest.py:162(evaluate_packet)
+        1    0.001    0.001    6.523    6.523 contest.py:226(_inspect)
+        1    0.000    0.000    4.658    4.658 attachment_cascade.py:76(evaluate)
+        1    0.000    0.000    4.658    4.658 attachment_cascade.py:42(score_attachment)
+        8    0.010    0.001    4.204    0.526 numpy_pickle.py:674(load)
+        8    0.000    0.000    4.188    0.524 numpy_pickle.py:613(_unpickle)
+        8    0.872    0.109    4.188    0.523 pickle.py:1187(load)
+        1    0.000    0.000    2.626    2.626 attachment_passage.py:145(load)
+        1    0.001    0.001    2.626    2.626 attachment_passage.py:67(__init__)
+  1409885    1.327    0.000    1.885    0.000 pickle.py:287(read)
+       12    1.704    0.142    1.704    0.142 onnxruntime_inference_collection.py:248(run)
+   233412    0.451    0.000    1.114    0.000 pickle.py:1425(load_short_binunicode)
+        1    0.000    0.000    0.973    0.973 document_encoder.py:84(detect)
+        1    0.000    0.000    0.885    0.885 recipient_model.py:83(review_attachment)
+        1    0.000    0.000    0.885    0.885 document_review.py:44(review)
+        1    0.000    0.000    0.885    0.885 document_review.py:37(probability)
+        1    0.000    0.000    0.864    0.864 document_encoder.py:79(load)
+        1    0.000    0.000    0.864    0.864 document_encoder.py:12(__init__)
+        1    0.000    0.000    0.861    0.861 document_review.py:14(features)
+        1    0.000    0.000    0.852    0.852 recipient_fast.py:58(classify)
+        1    0.000    0.000    0.736    0.736 recipient_model.py:35(encode)
+   228527    0.291    0.000    0.730    0.000 pickle.py:1288(load_binint2)
+        1    0.000    0.000    0.675    0.675 category_model.py:44(predict)
+        1    0.000    0.000    0.641    0.641 jailbreak_intent.py:60(detects)
+        1    0.000    0.000    0.622    0.622 jailbreak_intent.py:55(load)
+
+
+
+allow
+         280696 function calls (280113 primitive calls) in 2.346 seconds
+
+   Ordered by: cumulative time
+   List reduced from 686 to 27 due to restriction <27>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    2.348    2.348 profile_replay.py:17(call)
+        1    0.000    0.000    2.348    2.348 contest.py:123(inspect_request)
+        1    0.000    0.000    1.698    1.698 contest.py:162(evaluate_packet)
+        1    0.000    0.000    1.698    1.698 contest.py:226(_inspect)
+       12    1.599    0.133    1.599    0.133 onnxruntime_inference_collection.py:248(run)
+        1    0.000    0.000    0.981    0.981 recipient_fast.py:58(classify)
+        1    0.000    0.000    0.856    0.856 recipient_model.py:35(encode)
+        1    0.000    0.000    0.644    0.644 recipient_model.py:83(review_attachment)
+        1    0.000    0.000    0.644    0.644 document_review.py:44(review)
+        1    0.000    0.000    0.644    0.644 document_review.py:37(probability)
+        1    0.000    0.000    0.637    0.637 document_review.py:14(features)
+       15    0.000    0.000    0.569    0.038 pipeline.py:915(decision_function)
+    51/20    0.000    0.000    0.567    0.028 _set_output.py:314(wrapped)
+       15    0.000    0.000    0.560    0.037 pipeline.py:1998(transform)
+       16    0.000    0.000    0.549    0.034 parallel.py:54(__call__)
+       16    0.000    0.000    0.549    0.034 parallel.py:1969(__call__)
+       74    0.001    0.000    0.547    0.007 parallel.py:1888(_get_sequential_output)
+       42    0.001    0.000    0.544    0.013 parallel.py:131(__call__)
+       42    0.000    0.000    0.541    0.013 pipeline.py:1498(_transform_one)
+        1    0.000    0.000    0.353    0.353 attachment_cascade.py:76(evaluate)
+        1    0.000    0.000    0.353    0.353 attachment_cascade.py:42(score_attachment)
+       35    0.000    0.000    0.349    0.010 text.py:2111(transform)
+       35    0.000    0.000    0.310    0.009 text.py:1399(transform)
+       35    0.123    0.004    0.309    0.009 text.py:1247(_count_vocab)
+       15    0.001    0.000    0.283    0.019 pipeline.py:1051(transform)
+     1889    0.240    0.000    0.240    0.000 {method 'search' of 're.Pattern' objects}
+        1    0.001    0.001    0.223    0.223 attachment_passage.py:87(candidates)
+
+

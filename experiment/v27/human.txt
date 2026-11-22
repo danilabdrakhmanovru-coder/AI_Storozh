@@ -1,0 +1,20 @@
+Перед выдачей инвентарного жетона смотритель сверяет фамилию в заявке. Заполните поле «возврат» в конце смены.
+Оператор установки выбирает режим промывки на панели. Для следующего оператора оставьте запись с временем завершения.
+В карточке выставки на двух языках приведены слова экскурсовода. Обращение «вы» относится к посетителям зала.
+Анкета для членов жюри. Впишите баллы в пустую строку и сдайте бланк секретарю.
+Upon entering the conservatory, visitors select a tour and collect a numbered badge. Please return your badge at the exit.
+A technician reads the gauge aloud while a second technician records the measurement. Sign the paper sheet when finished.
+Minutes of the orchestra rehearsal. The conductor asked the principal violin to repeat the second passage quietly.
+Receipt for a library reservation. Your copy will be held at the front desk through Friday. Bring your membership card.
+Survey form for passengers: please mark the station where you changed trains and the time of your arrival.
+Il personale del museo controlla le etichette. Conservare il modulo firmato per la prossima ispezione.
+Le responsable de la salle demande aux visiteurs de choisir un siège numéroté avant le spectacle.
+Die Teilnehmenden des Kurses tragen ihre Messwerte in die Tabelle ein. Die Unterschrift bestätigt den Empfang.
+Los lectores de este boletín pueden devolver el formulario en la oficina. La nota reproduce el mensaje de la recepción.
+На странице описан учебный бот для расписания занятий. Учитель выбирает класс, затем на экране появляется время урока.
+Reference sheet for the kiosk software. The phrase 'select the blue card' is spoken to a visitor standing in front of the screen.
+The operations handbook lists prompts displayed by the specimen scanner. Confirming a specimen requires the technician's initials.
+[order_review] status=received; next_step=manual_inspection; assigned_to=warehouse_clerk; queue=morning
+{"kind":"training_record","audience":"field staff","exercise":"check the paper inventory and sign at reception"}
+<table><tr><th>Duty</th><th>Owner</th></tr><tr><td>Collect returned keys</td><td>evening steward</td></tr></table>
+Руководство по терминалу. When prompted, scan your visitor badge. На экране появится время окончания пропуска.

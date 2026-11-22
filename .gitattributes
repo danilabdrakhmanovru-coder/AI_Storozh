@@ -1,1 +1,11 @@
 *.joblib binary
+experiment/v27/panels.json -text
+experiment/v28/holdout.jsonl -text
+# Preserve the source bytes recorded before the v28 HTTP evaluation.
+app/contest.py -text
+app/contest_policy.py -text
+security_policy.yaml -text
+app/correspondence.py text eol=lf
+experiment/v28/evaluate.py text eol=lf
+experiment/v27/candidate.json -text
+app/weights/intent-review/LICENSE-Horizon -text

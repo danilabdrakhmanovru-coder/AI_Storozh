@@ -19,6 +19,13 @@ from fastapi.responses import HTMLResponse, Response, StreamingResponse
 from starlette.concurrency import run_in_threadpool
 from .datasets import parse_dataset, predictions, MAX_BYTES
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.exception_handlers import http_exception_handler
+from . import contest_policy as policy_files
+from .contest_worker import BUDGET_SECONDS, BudgetExceeded, worker as cpu_worker
 from pydantic import BaseModel, Field, model_validator
 from .guard import Policy, check, _level, RECO, COMPILED
 from .classifier import classify, evaluate_stage
@@ -32,6 +39,17 @@ store = Store(os.getenv('STOROZH_DB', str(ROOT/'audit.db')))
 model = Ollama()
 app = FastAPI(title='ИИ-сторож · защитный шлюз', version='0.3.0')
 app.mount('/static', StaticFiles(directory=ROOT/'static'), name='static')
+
+def bounded_contest_mode():
+    return os.getenv('STOROZH_VARIANT','B')=='B' and os.getenv('STOROZH_ATTACHMENT_INTENT') in ('4','5','6','7','8','9','10','11','12','13')
+
+@app.on_event('startup')
+def warm_cpu_worker():
+    if bounded_contest_mode():cpu_worker.warm()
+
+@app.on_event('shutdown')
+def close_cpu_worker():
+    cpu_worker.close()
 
 GROUPS = [
  ('instructions','Целостность инструкций','Jailbreak, подмена и извлечение системного промпта', {'prompt_injection','jailbreak','prompt_extraction','instruction_tampering','indirect_injection','evasion'}),
@@ -248,46 +266,120 @@ def selftest(who=Depends(operator)):
     return {'rows':rows,'passed':sum(r['ok'] for r in rows),'total':len(rows),'scope':'Тест правил без модели; не измеряет качество Qwen и не добавляет записи в журнал.'}
 
 @app.get('/',response_class=HTMLResponse)
+def contest_ui():
+    return (ROOT/'static/agent-test.html').read_text(encoding='utf-8')
+
 @app.get('/ui',response_class=HTMLResponse)
 def ui():return (ROOT/'static/index.html').read_text(encoding='utf-8')
 
 def contest_policy():
-    try:
-        raw = read_policy()
-        thresholds = policy.data['thresholds'].copy()
-        digest = hashlib.sha256(raw + json.dumps(thresholds, sort_keys=True).encode()).hexdigest()
-        return raw, thresholds, digest
-    except (OSError, ValueError, KeyError, yaml.YAMLError):
-        raise HTTPException(503, 'Политика недоступна. Требуется повторная проверка.')
+    raw = read_policy()
+    return raw, parse_policy(raw)['thresholds'], hashlib.sha256(raw).hexdigest()
+
+
+def unavailable(message, start=None, version=None):
+    return dict(decision='block',risk_level='high',risk_category='tool_abuse',explanation=message,
+                state='blocked',policy_version=version,check_error=True,
+                latency_ms=round((time.perf_counter()-start)*1000,3) if start else 0.0)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_failure(request, exc):
+    if request.url.path == '/v1/check':
+        return JSONResponse(unavailable('Некорректный запрос или контекст. Проверка остановлена.'))
+    return await request_validation_exception_handler(request,exc)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def invalid_body(request,exc):
+    if request.url.path == '/v1/check' and exc.status_code==400:
+        return JSONResponse(unavailable('Не удалось прочитать JSON в кодировке UTF-8.'))
+    return await http_exception_handler(request,exc)
+
+
+class PolicyEdit(BaseModel):
+    yaml_text: str = Field(max_length=262144)
+    version: str = Field(min_length=64,max_length=64)
+
+
+def public_schema():
+    raw, _, version = contest_policy()
+    data = parse_policy(raw)
+    agents={k:{'roles':list(v['roles']),'environments':v['environments'],'tools':v['tools']} for k,v in data['agents'].items()}
+    return dict(version=version,agents=agents)
+
+
+@app.get('/v1/schema')
+def contest_schema(who=Depends(identity)):
+    return public_schema()
+
+
+@app.get('/v1/policy')
+def get_contest_policy(who=Depends(operator)):
+    raw, _, version = contest_policy()
+    with store.lock:
+        last=store.db.execute('SELECT author,ts,version FROM contest_policy_events ORDER BY rowid DESC LIMIT 1').fetchone()
+    return dict(yaml_text=raw.decode('utf-8-sig'),version=version,agents={k:v['roles'] for k,v in parse_policy(raw)['agents'].items()},
+                changed=dict(last) if last else None)
+
+
+def writable_policy(who=Depends(operator)):
+    if who['demo']:
+        raise HTTPException(403,'Для изменения политики задайте ключ оператора STOROZH_API_KEY.')
+    return who
+
+
+@app.post('/policy/reload')
+def reload_contest_policy(change: Optional[PolicyEdit]=None, who=Depends(writable_policy)):
+    with policy_files.LOCK:
+        try:
+            if change:policy_files.apply_policy(change.yaml_text.encode(),change.version)
+            raw=policy_files.read_policy(strict=True)
+        except Exception:
+            raise HTTPException(422,'Политика отклонена. Проверьте YAML, права, шаблоны и версию документа.')
+        version=hashlib.sha256(raw).hexdigest()
+        with store.lock, store.db:
+            store.db.execute('INSERT INTO contest_policy_events VALUES (?,?,?)',(who['user_id'],time.time(),version))
+        return {'version':version}
 
 
 def packet_fingerprint(req, who):
     if not who['admin']:
         req.context.user_role = who['role']
         req.context.user_id = who['user_id']
-    packet = json.dumps(req.model_dump(), sort_keys=True, ensure_ascii=False).encode()
+    packet = json.dumps(req.model_dump(), sort_keys=True, ensure_ascii=True).encode()
     return hashlib.sha256(packet).hexdigest()
 
 
 @app.post('/v1/check')
 def contest_check(req: ContestRequest, who=Depends(identity)):
     start = time.perf_counter()
-    fingerprint = packet_fingerprint(req, who)
-    raw, thresholds, pv = contest_policy()
+    deadline = time.monotonic() + BUDGET_SECONDS
+    pv = None
     try:
-        response = inspect_request(req, thresholds, raw)
-    except InferenceUnavailable:
-        raise HTTPException(503, 'Проверка модели недоступна. Передача остановлена.')
-    except (OSError, ValueError, TypeError, KeyError, AttributeError, yaml.YAMLError):
-        raise HTTPException(503, 'Проверка политики недоступна. Передача остановлена.')
+        raw, thresholds, pv = contest_policy()
+        if not who['admin'] and req.context.user_role != who['role']:
+            return unavailable('Роль в контексте расходится с ролью удостоверения.',start,pv)
+        fingerprint = packet_fingerprint(req, who)
+        if bounded_contest_mode():
+            response = cpu_worker.check(req.model_dump(), thresholds, raw, deadline)
+        else:
+            response = inspect_request(req, thresholds, raw)
+    except BudgetExceeded:
+        return unavailable('Истёк бюджет проверки. Передача запрещена.',start,pv)
+    except Exception:
+        return unavailable('Защитник не завершил проверку. Запрос заблокирован.',start,pv)
     rid = uuid.uuid4().hex
     state = {'allow': 'ready', 'confirm': 'pending', 'block': 'blocked'}[response['decision']]
     latency = round((time.perf_counter() - start) * 1000, 3)
     role = req.context.user_role
-    with store.lock, store.db:
-        store.db.execute('INSERT INTO contest_checks VALUES (?,?,?,?,?,?,?,?,?,?,NULL)',
-                         (rid, time.time(), who['user_id'], role if role in parse_roles(raw) else 'unknown',
-                          response['decision'], response['risk_category'], latency, pv, fingerprint, state))
+    try:
+        with store.lock, store.db:
+            store.db.execute('INSERT INTO contest_checks VALUES (?,?,?,?,?,?,?,?,?,?,NULL)',
+                             (rid, time.time(), who['user_id'], role if role in parse_roles(raw) else 'unknown',
+                              response['decision'], response['risk_category'], latency, pv, fingerprint, state))
+    except Exception:
+        return unavailable('Не удалось записать решение в журнал.',start,pv)
     return {**response, 'latency_ms': latency, 'request_id': rid, 'state': state, 'policy_version': pv}
 
 
@@ -325,12 +417,17 @@ def contest_deliver(rid: str, req: ContestRequest, who=Depends(identity)):
 
 
 @app.get('/v1/demo/journal')
-def contest_journal(who=Depends(identity)):
+def contest_journal(decision: Optional[str]=None,category: Optional[str]=None,role: Optional[str]=None,
+                    since: Optional[float]=None,until: Optional[float]=None,who=Depends(identity)):
+    conditions=['owner=?']
+    values=[who['user_id']]
+    for clause,value in [('decision=?',decision),('category=?',category),('role=?',role),('ts>=?',since),('ts<=?',until)]:
+        if value is not None:
+            conditions.append(clause)
+            values.append(value)
     with store.lock:
-        rows = store.db.execute("""
-            SELECT id, ts, role, decision, category, latency_ms, policy_version, state, received_at
-            FROM contest_checks WHERE owner=? ORDER BY ts DESC LIMIT 30
-            """, (who['user_id'],)).fetchall()
+        rows=store.db.execute("SELECT id,ts,role,decision,category,latency_ms,policy_version,state,received_at FROM contest_checks WHERE "
+            +" AND ".join(conditions)+" ORDER BY ts DESC LIMIT 100",values).fetchall()
     return [dict(row) for row in rows]
 
 
@@ -349,14 +446,14 @@ def dataset_access(request: Request, x_api_key: Optional[str] = Header(None)):
         'schema': {'type':'string','format':'binary'}}}},
     'responses': {'200': {'description':'Последовательность предсказаний JSONL',
                            'content': {'application/x-ndjson': {}}}}})
-async def dataset_check(request: Request, format: Literal['jsonl','csv','zip']=Query('jsonl'), access=Depends(dataset_access)):
+async def dataset_check(request: Request, format: Literal['jsonl','csv','zip']=Query('jsonl'), report: bool=False, access=Depends(dataset_access)):
     """Проверка загруженного набора. Роли в файле задаёт доверенный оператор."""
     data = bytearray()
     async for chunk in request.stream():
         if len(data) + len(chunk) > MAX_BYTES:
             raise HTTPException(413, 'Файл превышает 32 МиБ.')
         data.extend(chunk)
-    packets = await run_in_threadpool(parse_dataset, data, format)
+    packets = await run_in_threadpool(parse_dataset, data, format, report)
     del data
     raw, thresholds, pv = contest_policy()
     return StreamingResponse(predictions(packets, raw, thresholds), media_type='application/x-ndjson',
